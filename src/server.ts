@@ -4,6 +4,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import errorHandler from './middlewares/errorMiddleware';
 import usersRouter from './users/usersRouter';
+import removeExpiredTokens from './utils/removeExpiredTokens';
 
 
 export const app = express();
@@ -28,3 +29,6 @@ app.get('*', (req: Request, res: Response) => {
 
 // Error Middleware
 app.use(errorHandler);
+
+// We run a function to remove invalid tokens every 1 hour
+setInterval(removeExpiredTokens, 3600000);
