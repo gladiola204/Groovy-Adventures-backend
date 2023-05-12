@@ -2,6 +2,8 @@ import * as dotenv from 'dotenv' // see https://github.com/motdotla/dotenv#how-d
 dotenv.config();
 import express, { Request, Response } from 'express';
 import cors from 'cors';
+import errorHandler from './middlewares/errorMiddleware';
+import usersRouter from './users/usersRouter';
 
 
 export const app = express();
@@ -15,7 +17,7 @@ app.set("x-powered-by", false);
 
 
 // Routes Middlewares
-
+app.use('/api/users', usersRouter);
 
 
 // Routes
@@ -25,3 +27,4 @@ app.get('*', (req: Request, res: Response) => {
 
 
 // Error Middleware
+app.use(errorHandler);
