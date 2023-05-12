@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { Types } from 'mongoose';
 import Token from "../models/tokenModel";
 import sendEmail from "../utils/sendEmail";
+import crypto from 'crypto';
 
 const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -78,7 +79,7 @@ export async function registerUser(req: Request, res: Response) {
         }).save();
 
         // Construct confirmEmail URL 
-        const confirmUrl = `${process.env.FRONTEND_URL}/confirmEmail/${confirmEmailToken}`;
+        const confirmUrl = `${process.env.FRONTEND_URL}confirmEmail/${confirmEmailToken}`;
 
         // Reset email
         const message = `
@@ -115,3 +116,27 @@ export async function registerUser(req: Request, res: Response) {
     };
 
 };
+
+export async function confirmEmail(req: Request, res: Response) {
+    const { token } = req.params;
+
+    const validToken = await Token.findOne({ 
+        token,
+        expiresAt: { $gt: new Date() } 
+    });
+
+    if(validToken) {
+        const { userId } = validToken;
+        await User.findByIdAndUpdate(userId, {
+            emailVerified: true,
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'Email has been verified, please login',
+        });
+    } else {
+        res.status(400);
+        throw new Error("Invalid or expired token")
+    }
+}
