@@ -5,6 +5,7 @@ const tokenSchema = new mongoose.Schema({
     userId: {
         type: Types.ObjectId,
         required: true,
+        ref: 'User',
     },
     token: {
         type: String,
@@ -30,7 +31,18 @@ tokenSchema.pre('findOne', async function(next: (err?: Error) => void) {
         this.setQuery(filter);
     }
     next();
-})
+});
+
+tokenSchema.pre('deleteOne', async function(next: (err?: Error) => void) {
+    const filter = this.getFilter();
+    if (filter.token) {
+        const hashedToken = crypto.createHash('sha256').update(filter.token).digest('hex');
+        filter.token = hashedToken;
+        this.setQuery(filter);
+        console.log(filter);
+    }
+    next();
+});
 
 const Token = mongoose.model("Token", tokenSchema);
 
