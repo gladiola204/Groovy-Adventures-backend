@@ -6,6 +6,7 @@ import Token from "../models/tokenModel";
 import sendEmail from "../utils/sendEmail";
 import bcryptjs from 'bcryptjs';
 import IUser from "../types/user.interface";
+import crypto from 'crypto';
 
 const isValidEmail = (email: string) => {
     const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
@@ -306,4 +307,63 @@ export async function changePassword(req: Request, res: Response) {
         success: true,
         message: "Password has been changed successfully."
     });
+}
+
+export async function forgotPassword(req: Request, res: Response) {
+    const { email } = req.body;
+
+    areDataExist(res, [req.body, email], "Please fill in email address", true);
+
+    if(!isValidEmail(email)) {
+        res.status(400);
+        throw new Error("Invalid email address format.")
+    }
+
+    const user = await User.findOne({ email });
+
+    if(user === null) {
+        res.status(404);
+        throw new Error("User not found");
+    }
+
+    const resetToken = generateToken(user._id);
+
+    // Save token to DB
+    await new Token({
+        userId: user._id,
+        token: resetToken,
+        createdAt: Date.now(),
+        expiresAt: Date.now() + 30 * (60 * 1000), // 30 minutes
+    }).save();
+
+    // Construct reset URL 
+    const resetUrl = `${process.env.FRONTEND_URL}/resetpassword/${resetToken}`;
+
+    // Reset email
+    const message = `
+        <h2>Hello ${user.login}</h2>
+        <p>Please use the url below to reset your password.</p>
+        <p>This reset link is valid for only 30 minutes.</p>
+
+        <a href=${resetUrl} clicktracking=off>${resetUrl}</a>
+
+        <p>Regards...</p>
+        <p>Pinvent Team</p>
+    `;
+
+    const subject = 'Password Reset Request Pinvent App';
+    const send_to = user.email;
+    const sent_from = process.env.EMAIL_USER as string;
+
+    try {
+        await sendEmail(subject, message, send_to, sent_from);
+        res.status(200).json({
+            success: true,
+            message: "Reset email sent"
+        })
+    } catch (error) {
+        res.status(500);
+        throw new Error("Email not sent, please try again");
+    }
+
 }
