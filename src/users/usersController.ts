@@ -6,7 +6,6 @@ import Token from "../models/tokenModel";
 import sendEmail from "../utils/sendEmail";
 import bcryptjs from 'bcryptjs';
 import IUser from "../types/user.interface";
-import crypto from 'crypto';
 
 const isValidEmail = (email: string) => {
     const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
@@ -367,3 +366,40 @@ export async function forgotPassword(req: Request, res: Response) {
     }
 
 }
+
+export async function resetPassword(req: Request, res: Response) {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+
+    areDataExist(res, [req.body, newPassword], "Please fill in new password field.", true);
+
+    // verify token
+    const verifiedToken = jwt.verify(token, `${process.env.JWT_SECRET}`) as JwtPayload;
+
+    if(!verifiedToken) {
+        res.status(401);
+        throw new Error('Token is not verified.');
+    };
+
+    const tokenFromDB = await Token.findOne({ token, expiresAt: { $gt: Date.now() } });
+
+    if(!tokenFromDB) {
+        res.status(404);
+        throw new Error("Invalid or expired token");
+    };
+
+    const user = await User.findById(tokenFromDB.userId);
+
+    if(user === null) {
+        res.status(404);
+        throw new Error("User not found.");
+    };
+
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({
+        success: true,
+        message: "Password has been changed succesfully. Please login.",
+    });
+};

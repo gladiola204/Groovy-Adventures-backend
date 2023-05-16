@@ -1,5 +1,5 @@
 import express from 'express';
-import { changePassword, confirmEmail, forgotPassword, loginUser, logoutUser, registerUser, resendVerificationEmail, statusUser, updateUser } from './usersController';
+import { changePassword, confirmEmail, forgotPassword, loginUser, logoutUser, registerUser, resendVerificationEmail, resetPassword, statusUser, updateUser } from './usersController';
 import { catchAsync } from '../utils/catchAsync';
 import { protection } from '../middlewares/authMiddleware';
 
@@ -14,5 +14,6 @@ usersRouter.get('/loggedin', catchAsync(protection), catchAsync(statusUser));
 usersRouter.patch('/updateuser', catchAsync(protection), catchAsync(updateUser));
 usersRouter.patch('/changepassword', catchAsync(protection), catchAsync(changePassword));
 usersRouter.post('/forgotpassword', catchAsync(forgotPassword));
+usersRouter.patch('/resetpassword/:token', catchAsync(resetPassword));
 
 export default usersRouter;
