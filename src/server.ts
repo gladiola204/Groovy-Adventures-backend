@@ -5,6 +5,7 @@ import cors from 'cors';
 import errorHandler from './middlewares/errorMiddleware';
 import usersRouter from './users/usersRouter';
 import removeExpiredTokens from './utils/removeExpiredTokens';
+import adminRouter from './admin/adminRouter';
 
 
 export const app = express();
@@ -19,7 +20,7 @@ app.set("x-powered-by", false);
 
 // Routes Middlewares
 app.use('/api/users', usersRouter);
-
+app.use('/api/admin', adminRouter);
 
 // Routes
 app.get('*', (req: Request, res: Response) => {

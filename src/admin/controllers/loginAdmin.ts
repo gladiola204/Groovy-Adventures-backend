@@ -1,13 +1,13 @@
-import { Request, Response } from 'express';
-import checkDataExistence from '../../utils/validators/checkDataExistence';
-import emailValidator from '../../utils/validators/emailValidator';
-import Token from '../../models/tokenModel';
-import User from '../../models/userModel';
-import IUser from '../../types/user.interface';
-import { generateToken } from '../../utils/tokenUtils';
+import { Request, Response } from "express";
+import Token from "../../models/tokenModel";
+import User from "../../models/userModel";
+import IUser from "../../types/user.interface";
+import { generateToken } from "../../utils/tokenUtils";
+import checkDataExistence from "../../utils/validators/checkDataExistence";
+import emailValidator from "../../utils/validators/emailValidator";
 import bcryptjs from 'bcryptjs';
 
-async function loginUser(req: Request, res: Response) {
+async function loginAdmin(req: Request, res: Response) {
     const { body } = req;
     const { email, password } = body;
 
@@ -29,7 +29,7 @@ async function loginUser(req: Request, res: Response) {
         res.status(400);
         throw new Error("User doesn't exist. Please sign up.")
     }
-    const { _id, emailVerified, login, phone, role } = userExists;
+    const { _id, emailVerified, login, role } = userExists;
 
     // Check if password is correct
     const isPasswordCorrect = await bcryptjs.compare(password, userExists.password);
@@ -49,12 +49,12 @@ async function loginUser(req: Request, res: Response) {
     await new Token({
         userId: _id,
         token,
-        expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
+        expiresAt: Date.now() + (1 * 60 * 60 * 1000), // 1 hour
     }).save();
 
     res.status(200).json({
-        _id, login, email, phone, token, role,
+        _id, login, email, token, role
     });
 };
 
-export default loginUser;
+export default loginAdmin;
