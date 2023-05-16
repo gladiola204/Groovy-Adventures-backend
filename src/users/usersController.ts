@@ -91,6 +91,7 @@ const verificationTokenAndEmail = async (req: Request, res: Response, user: IUse
         };
 }
 
+
 export async function registerUser(req: Request, res: Response) {
     const { body } = req;
     const { email, login, password } = body;
@@ -233,7 +234,6 @@ export async function loginUser(req: Request, res: Response) {
 
 export async function logoutUser(req: Request, res: Response) {
     const { token } = req.body;
-    console.log("Jestem tutaj");
 
     await Token.deleteOne({ token });
 
@@ -241,4 +241,32 @@ export async function logoutUser(req: Request, res: Response) {
         success: true,
         message: "User logged out."
     })
+};
+
+export async function statusUser(req: Request, res: Response) {
+    res.status(200).json({
+        success: true,
+    });
+};
+
+export async function updateUser(req: Request, res: Response) {
+    const { phone } = req.body;
+
+    areDataExist(res, [phone], "Phone field is empty", true);
+
+    if(!phone.startsWith('+')) {
+        res.status(400);
+        throw new Error("Invalid phone number format")
+    };
+
+    const updatedUser = await User.findByIdAndUpdate(req.user?._id, { phone });
+
+    if(updatedUser) {
+        res.status(200).json({
+            phone,
+        });
+    } else {
+        res.status(404);
+        throw new Error("User not found");
+    };
 };

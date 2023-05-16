@@ -39,7 +39,6 @@ tokenSchema.pre('deleteOne', async function(next: (err?: Error) => void) {
         const hashedToken = crypto.createHash('sha256').update(filter.token).digest('hex');
         filter.token = hashedToken;
         this.setQuery(filter);
-        console.log(filter);
     }
     next();
 });
