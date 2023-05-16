@@ -1,7 +1,16 @@
 import express from 'express';
-import { changePassword, confirmEmail, forgotPassword, loginUser, logoutUser, registerUser, resendVerificationEmail, resetPassword, statusUser, updateUser } from './usersController';
 import { catchAsync } from '../utils/catchAsync';
 import { protection } from '../middlewares/authMiddleware';
+import changePassword from './controllers/changePassword';
+import confirmEmail from './controllers/confirmEmail';
+import forgotPassword from './controllers/forgotPassword';
+import loginUser from './controllers/loginUser';
+import logoutUser from './controllers/logoutUser';
+import registerUser from './controllers/registerUser';
+import resendVerificationEmail from './controllers/resendVerificationEmail';
+import resetPassword from './controllers/resetPassword';
+import statusUser from './controllers/statusUser';
+import { updateUser } from './controllers/updateUser';
 
 const usersRouter = express.Router();
 

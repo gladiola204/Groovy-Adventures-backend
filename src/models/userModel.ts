@@ -30,7 +30,11 @@ const userSchema = new mongoose.Schema({
     emailVerified: {
         type: Boolean,
         default: false
-      }
+    },
+    role: {
+        type: String,
+        default: "user",
+    }
 }, {
     timestamps: true,
 });

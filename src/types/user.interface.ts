@@ -9,6 +9,7 @@ interface IUser {
     emailVerified: boolean,
     createdAt: Date,
     updatedAt: Date,
+    role: string,
 }
 
 export default IUser;

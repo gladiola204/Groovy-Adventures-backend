@@ -1,15 +1,14 @@
 import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import User from "../models/userModel";
-import { areDataExist } from "../users/usersController";
 import Token from "../models/tokenModel";
-import IUser from "../types/user.interface";
+import checkDataExistence from "../utils/validators/checkDataExistence";
 
 
 export const protection = async (req: Request, res: Response, next: NextFunction) => {
     const { token } = req.body;
         
-    areDataExist(res, [req.body, token], "Not authorized, please login", true);
+    checkDataExistence(res, [req.body, token], "Not authorized, please login", true);
 
     // Verify token
     const verified = jwt.verify(token, `${process.env.JWT_SECRET}`) as JwtPayload;
