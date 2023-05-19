@@ -43,7 +43,7 @@ async function loginAdmin(req: Request, res: Response) {
         throw new Error("Email has not yet been verified. Verify it to be able to log in")
     };
 
-    const token = generateToken(_id);
+    const token = generateToken(_id, 'admin');
 
     // Save token to DB
     await new Token({
