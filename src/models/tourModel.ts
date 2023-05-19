@@ -1,4 +1,5 @@
-import mongoose from "mongoose";
+import mongoose, { Document, Model } from "mongoose";
+import slugify from "slugify";
 
 interface IPartialRatings {
     cleanliness: number;
@@ -16,7 +17,32 @@ interface IReview {
     averagePartialRating: number,
 };
 
-const tourSchema = new mongoose.Schema({
+interface ITour {
+    title: string,
+    images: [{
+        fileData: Object,
+        isMain: boolean,
+    }],
+    schedule: [{
+        startDate: Date,
+        endDate: Date,
+        price: number,
+        availability: number,
+    }],
+    category: mongoose.Schema.Types.ObjectId,
+    generalDescription: string,
+    dailyItineraryDescription: string,
+    reviews: IReview[],
+    averageRating: number,
+    slug: string,
+    updateSlug(): string;
+};
+
+interface ITourDocument extends ITour, Document {}
+
+interface ITourModel extends Model<ITourDocument> {}
+
+const tourSchema = new mongoose.Schema<ITourDocument, ITourModel>({
     title: {
         type: String,
         required: [true, "Please add a title"],
@@ -57,18 +83,13 @@ const tourSchema = new mongoose.Schema({
         ref: 'Category',
         required: [true, 'Please add a category'],
     },
-    description: {
-        type: {
-            general: {
-                type: String,
-                required: [true, "Please add a general description"],
-            },
-            dailyItinerary: {
-                type: String,
-                required: [true, "Please add a daily itinerary"],
-            },
-        },
-        required: [true, 'Please add a description'],
+    generalDescription: {
+        type: String,
+        required: [true, "Please add a general description"],
+    },
+    dailyItineraryDescription: {
+        type: String,
+        required: [true, "Please add a daily itinerary"],
     },
     reviews: {
         type: [{
@@ -104,6 +125,10 @@ const tourSchema = new mongoose.Schema({
     averageRating: {
         type: Number,
         default: 0
+    },
+    slug: {
+        type: String, 
+        unique: true
     }
 }, {
     timestamps: true,
@@ -121,16 +146,20 @@ tourSchema.methods.calculateAveragePartialRating = function () {
     });
 };
 
+export function updateSlug(title: string) {
+    const slug = slugify(title, { lower: true, strict: true });
+    return slug;
+};
+
 tourSchema.pre('save', async function (next: (err?: Error) => void) {
-    if(!this.isModified("reviews")) {
-        return next();
-    };
-    if (this.reviews.length === 0) {
-        return next();
-    } else {
+    if (this.isModified("reviews") && this.reviews.length !== 0) {
         const totalRating = this.reviews.reduce((sum: number, review: IReview) => sum + review.averagePartialRating, 0);
         this.averageRating = totalRating / this.reviews.length;
     };
+
+    if (this.isModified('title')) {
+        this.slug = updateSlug(this.title);
+    }
 
     next();
 });
