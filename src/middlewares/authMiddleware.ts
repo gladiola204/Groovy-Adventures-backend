@@ -6,10 +6,14 @@ import checkDataExistence from "../utils/validators/checkDataExistence";
 
 
 export const protection = async (req: Request, res: Response, next: NextFunction) => {
-    const { token } = req.body;
+    const { authorization: authorizationHeader } = req.headers;
+    const token = authorizationHeader?.split(' ')[1];
+    
+    if (!token) {
+        res.status(400);
+        throw new Error('Missing or invalid authorization token.');
+    }
         
-    checkDataExistence(res, [req.body, token], "Not authorized, please login", true);
-
     // Verify token
     const verified = jwt.verify(token, `${process.env.JWT_SECRET}`) as JwtPayload;
     
