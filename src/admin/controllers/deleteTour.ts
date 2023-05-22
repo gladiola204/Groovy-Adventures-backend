@@ -18,7 +18,7 @@ async function deleteTour(req: Request, res: Response) {
         publicIds.push(image.fileData.filePublicId);
     });
 
-    deleteImages(res, publicIds.join(','));
+    deleteImages(res, publicIds);
     
     res.status(200).json({ 
         success: true,

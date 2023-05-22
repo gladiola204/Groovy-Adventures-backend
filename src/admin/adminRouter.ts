@@ -14,7 +14,7 @@ const adminRouter = Router();
 adminRouter.post('/login', catchAsync(loginAdmin));
 
 adminRouter.post('/tours', catchAsync(protection), adminProtection, upload.array('images', 10), catchAsync(createTour));
-adminRouter.patch('/tours/:slug', catchAsync(protection), adminProtection, catchAsync(updateTour));
+adminRouter.patch('/tours/:slug', catchAsync(protection), adminProtection, upload.array('images', 10), catchAsync(updateTour));
 adminRouter.delete('/tours/:slug', catchAsync(protection), adminProtection, catchAsync(deleteTour));
 
 adminRouter.post('/categories', catchAsync(protection), adminProtection, upload.single('image'), catchAsync(createCategory));

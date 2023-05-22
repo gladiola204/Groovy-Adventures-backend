@@ -10,7 +10,7 @@ async function uploadImages(req: Request, res: Response) {
         try {
            for (const file of fileList) {
                const uploadedFile = await cloudinary.v2.uploader.upload(file.path, {
-                 folder: 'Groovy Adventures',
+                 folder: 'Groovy-Adventures',
                  resource_type: 'image'
                });
 

@@ -2,13 +2,22 @@ import { Request, Response } from "express";
 import checkDataExistence from "../../utils/validators/checkDataExistence";
 import Category from "../../models/categoryModel";
 import Tour, { updateSlug } from "../../models/tourModel";
-import { fileSizeFormatter } from "../../utils/uploadFiles";
-import cloudinary from 'cloudinary';
 import uploadImages from "./utils/uploadImages";
+import deleteImages from "./utils/deleteImages";
 
 async function updateTour(req: Request, res: Response) {
-    const { title, category, generalDescription, dailyItineraryDescription, price, availability, startDate, endDate } = req.body;
+    const { title, 
+        category, 
+        generalDescription, 
+        dailyItineraryDescription, 
+        price, 
+        availability, 
+        startDate, 
+        endDate,
+        publicIds} = req.body;
     const { slug } = req.params;
+
+    // publicIds = string[]
 
     checkDataExistence(res,
         [req.body], 
@@ -25,12 +34,13 @@ async function updateTour(req: Request, res: Response) {
 
     // Zmienić jak już zakończę testy w Postmanie
 
-    const schedule = {
-        startDate: new Date(startDate),
-        endDate: new Date(endDate),
-        price: Number(price),
-        availability: Number(availability),
-    }
+        // const schedule = {
+        //     startDate: new Date(startDate),
+        //     endDate: new Date(endDate),
+        //     price: Number(price),
+        //     availability: Number(availability),
+        // }
+    const schedule = undefined;
     
     // Check if title is unique
     if(title) {
@@ -49,10 +59,20 @@ async function updateTour(req: Request, res: Response) {
             res.status(404)
             throw new Error("Category doesn't exist")
         };
+    };
+    
+    if(publicIds) {
+        deleteImages(res, publicIds);
     }
 
     // Handle images upload
     const uploadedImages = await uploadImages(req, res);
+
+    const filteredImages = tour.images.filter(image => {
+        return !publicIds.includes(image.fileData.filePublicId);
+    });
+
+    const images = [...uploadedImages, ...filteredImages];
 
     const updatedTour = await Tour.findOneAndUpdate(
         {slug: slug},
@@ -62,7 +82,7 @@ async function updateTour(req: Request, res: Response) {
             dailyItineraryDescription,
             generalDescription,
             schedule,
-            images: uploadedImages.length === 0 ? tour.images : uploadedImages,
+            images,
             slug: title !== undefined ? updateSlug(title) : slug,
         },
         {
@@ -70,7 +90,6 @@ async function updateTour(req: Request, res: Response) {
             runValidators: true,
         }
     );
-
     res.status(200).json(updatedTour);
     
 };
