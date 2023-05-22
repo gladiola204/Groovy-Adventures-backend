@@ -20,7 +20,13 @@ interface IReview {
 interface ITour {
     title: string,
     images: [{
-        fileData: Object,
+        fileData: {
+            fileName: string,
+            filePath: string,
+            filePublicId: string,
+            fileType: string,
+            fileSize: string,
+        },
         isMain: boolean,
     }],
     schedule: [{
@@ -35,7 +41,6 @@ interface ITour {
     reviews: IReview[],
     averageRating: number,
     slug: string,
-    updateSlug(): string;
 };
 
 interface ITourDocument extends ITour, Document {}
@@ -50,7 +55,13 @@ const tourSchema = new mongoose.Schema<ITourDocument, ITourModel>({
     },
     images: [{
         fileData: {
-            type: Object,
+            type: {
+                fileName: {type: String, required: [true, 'Please add a file name']},
+                filePath: {type: String, required: [true, 'Please add a file path']},
+                filePublicId: {type: String, required: [true, 'Please add a file public ID']},
+                fileType: {type: String, required: [true, 'Please add a file type']},
+                fileSize: {type: String, required: [true, 'Please add a file size']},
+            },
             default: {},
             required: [true, "Please add an image's url"]
         },

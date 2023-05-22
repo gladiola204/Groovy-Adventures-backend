@@ -7,12 +7,16 @@ import { upload } from '../utils/uploadFiles';
 import createTour from './controllers/createTour';
 import createCategory from './controllers/createCategory';
 import updateTour from './controllers/updateTour';
+import deleteTour from './controllers/deleteTour';
 
 const adminRouter = Router();
 
 adminRouter.post('/login', catchAsync(loginAdmin));
+
 adminRouter.post('/tours', catchAsync(protection), adminProtection, upload.array('images', 10), catchAsync(createTour));
 adminRouter.patch('/tours/:slug', catchAsync(protection), adminProtection, catchAsync(updateTour));
+adminRouter.delete('/tours/:slug', catchAsync(protection), adminProtection, catchAsync(deleteTour));
+
 adminRouter.post('/categories', catchAsync(protection), adminProtection, upload.single('image'), catchAsync(createCategory));
 
 
