@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
 import checkDataExistence from "../../utils/validators/checkDataExistence";
 import Category from "../../models/categoryModel";
-import Tour, { updateSlug } from "../../models/tourModel";
+import Tour from "../../models/tourModel";
 import uploadImages from "./utils/uploadImages";
 import deleteImages from "./utils/deleteImages";
+import updateSlug from "../../utils/updateSlug";
 
 async function updateTour(req: Request, res: Response) {
     const { title, 
@@ -17,13 +18,7 @@ async function updateTour(req: Request, res: Response) {
         publicIds} = req.body;
     const { slug } = req.params;
 
-    // publicIds = string[]
-
-    checkDataExistence(res,
-        [req.body], 
-        "Please update at least one field", 
-        true
-    );
+    checkDataExistence(res, [req.body], "Please update at least one field", true);
 
     const tour = await Tour.findOne({ slug });
 
@@ -62,7 +57,7 @@ async function updateTour(req: Request, res: Response) {
     };
     
     if(publicIds) {
-        deleteImages(res, publicIds);
+        await deleteImages(res, publicIds);
     }
 
     // Handle images upload
