@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
-import slugify from "slugify";
+
 import { IReview, ITourDocument, ITourModel } from "../types/tour.interface";
+import updateSlug from "../utils/updateSlug";
 
 const tourSchema = new mongoose.Schema<ITourDocument, ITourModel>({
     title: {
@@ -110,11 +111,6 @@ tourSchema.methods.calculateAveragePartialRating = function () {
         const summary = cleanliness + valuePrice + food + communication + attractions + atmosphere;
         review.averagePartialRating = summary / Object.keys(review.partialRatings).length;
     });
-};
-
-export function updateSlug(title: string) {
-    const slug = slugify(title, { lower: true, strict: true });
-    return slug;
 };
 
 tourSchema.pre('save', async function (next: (err?: Error) => void) {
