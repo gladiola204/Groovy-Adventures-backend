@@ -8,6 +8,7 @@ import createTour from './controllers/createTour';
 import createCategory from './controllers/createCategory';
 import updateTour from './controllers/updateTour';
 import deleteTour from './controllers/deleteTour';
+import updateCategory from './controllers/updateCategory';
 
 const adminRouter = Router();
 
@@ -17,7 +18,8 @@ adminRouter.post('/tours', catchAsync(protection), adminProtection, upload.array
 adminRouter.patch('/tours/:slug', catchAsync(protection), adminProtection, upload.array('images', 10), catchAsync(updateTour));
 adminRouter.delete('/tours/:slug', catchAsync(protection), adminProtection, catchAsync(deleteTour));
 
-adminRouter.post('/categories', catchAsync(protection), adminProtection, upload.single('image'), catchAsync(createCategory));
+adminRouter.post('/categories', catchAsync(protection), adminProtection, upload.single('icon'), catchAsync(createCategory));
+adminRouter.patch('/categories/:slug', catchAsync(protection), adminProtection, upload.single('icon'), catchAsync(updateCategory));
 
 
 export default adminRouter;
