@@ -6,6 +6,7 @@ import errorHandler from './middlewares/errorMiddleware';
 import usersRouter from './users/usersRouter';
 import removeExpiredTokens from './utils/removeExpiredTokens';
 import adminRouter from './admin/adminRouter';
+import toursRouter from './tours/tourRouter';
 
 
 export const app = express();
@@ -21,6 +22,7 @@ app.set("x-powered-by", false);
 // Routes Middlewares
 app.use('/api/users', usersRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/tours', toursRouter);
 
 // Routes
 app.get('*', (req: Request, res: Response) => {
