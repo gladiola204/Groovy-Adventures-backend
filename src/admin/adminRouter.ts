@@ -9,6 +9,7 @@ import createCategory from './controllers/createCategory';
 import updateTour from './controllers/updateTour';
 import deleteTour from './controllers/deleteTour';
 import updateCategory from './controllers/updateCategory';
+import deleteCategory from './controllers/deleteCategory';
 
 const adminRouter = Router();
 
@@ -20,6 +21,8 @@ adminRouter.delete('/tours/:slug', catchAsync(protection), adminProtection, catc
 
 adminRouter.post('/categories', catchAsync(protection), adminProtection, upload.single('icon'), catchAsync(createCategory));
 adminRouter.patch('/categories/:slug', catchAsync(protection), adminProtection, upload.single('icon'), catchAsync(updateCategory));
+adminRouter.delete('/categories/:slug', catchAsync(protection), adminProtection, catchAsync(deleteCategory));
+
 
 
 export default adminRouter;
