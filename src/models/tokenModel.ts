@@ -17,13 +17,13 @@ const tokenSchema = new mongoose.Schema({
     },
 });
 
-tokenSchema.pre('save', async function(next: (err?: Error) => void) {
+tokenSchema.pre('save', function(next: (err?: Error) => void) {
     const hashedToken = crypto.createHash('sha256').update(this.token).digest('hex');
     this.token = hashedToken;
     next();
 });
 
-tokenSchema.pre('findOne', async function(next: (err?: Error) => void) {
+tokenSchema.pre('findOne', function(next: (err?: Error) => void) {
     const filter = this.getFilter();
     if (filter.token) {
         const hashedToken = crypto.createHash('sha256').update(filter.token).digest('hex');
@@ -33,7 +33,7 @@ tokenSchema.pre('findOne', async function(next: (err?: Error) => void) {
     next();
 });
 
-tokenSchema.pre('deleteOne', async function(next: (err?: Error) => void) {
+tokenSchema.pre('deleteOne', function(next: (err?: Error) => void) {
     const filter = this.getFilter();
     if (filter.token) {
         const hashedToken = crypto.createHash('sha256').update(filter.token).digest('hex');

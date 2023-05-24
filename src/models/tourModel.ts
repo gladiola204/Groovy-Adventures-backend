@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-import { IReview, ITourDocument, ITourModel } from "../types/tour.interface";
+import { ITourDocument, ITourModel } from "../types/tour.interface";
 import updateSlug from "../utils/updateSlug";
 
 const tourSchema = new mongoose.Schema<ITourDocument, ITourModel>({
@@ -60,32 +60,9 @@ const tourSchema = new mongoose.Schema<ITourDocument, ITourModel>({
     },
     reviews: {
         type: [{
-            userID: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'User',
-                required: [true, 'Add an userID']
-            },
-            partialRatings: {
-                type: {
-                    cleanliness: { type: Number, min: 0, max: 5, required: [true, ''] },
-                    valuePrice: { type: Number, required: [true, ''] },
-                    food: { type: Number, required: [true, ''] },
-                    communication: { type: Number, required: [true, ''] },
-                    attractions: { type: Number, required: [true, ''] },
-                    atmosphere: { type: Number, required: [true, ''] },
-                },
-                required: [true, 'Add a partial ratings']
-            },
-            averagePartialRating: {
-                type: Number,
-                default: 0,
-            },
-            comment: {
-                type: String,
-                default: '',
-                minlength: 100,
-                maxlength: 250,
-            }
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Review',
+            required: [true, 'Please add a category'],
         }],
         default: [] as unknown as undefined[],
     },
@@ -101,27 +78,29 @@ const tourSchema = new mongoose.Schema<ITourDocument, ITourModel>({
     timestamps: true,
 });
 
-tourSchema.methods.calculateAveragePartialRating = function () {
-    if (this.reviews.length === 0) {
-      return;
-    };
-
-    this.reviews.forEach((review: IReview) => {
-        const { cleanliness, valuePrice, food, communication, attractions, atmosphere } = review.partialRatings;
-        const summary = cleanliness + valuePrice + food + communication + attractions + atmosphere;
-        review.averagePartialRating = summary / Object.keys(review.partialRatings).length;
-    });
-};
-
-tourSchema.pre('save', async function (next: (err?: Error) => void) {
-    if (this.isModified("reviews") && this.reviews.length !== 0) {
-        const totalRating = this.reviews.reduce((sum: number, review: IReview) => sum + review.averagePartialRating, 0);
-        this.averageRating = totalRating / this.reviews.length;
-    };
-
+tourSchema.pre('save', function (next: (err?: Error) => void) {
     if (this.isModified('title')) {
         this.slug = updateSlug(this.title);
+        this.title = this.title.toLowerCase();
     }
+
+    next();
+});
+
+tourSchema.pre('findOne', function (next: (err?: Error) => void) {
+    const filters = this.getFilter();
+    if(filters.title) {
+        filters.title = filters.title.toLowerCase();
+    };
+
+    next();
+});
+
+tourSchema.pre('findOneAndUpdate', function (next: (err?: Error) => void) {
+    const filters = this.getFilter();
+    if(filters.title) {
+        filters.title = filters.title.toLowerCase();
+    };
 
     next();
 });

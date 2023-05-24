@@ -1,21 +1,5 @@
 import mongoose, { Document, Model } from "mongoose";
 
-interface IPartialRatings {
-    cleanliness: number;
-    valuePrice: number;
-    food: number;
-    communication: number;
-    attractions: number;
-    atmosphere: number;
-};
-
-export interface IReview {
-    userID: mongoose.Types.ObjectId,
-    comment: string,
-    partialRatings: IPartialRatings
-    averagePartialRating: number,
-};
-
 export interface ITour {
     title: string,
     images: [{
@@ -37,7 +21,7 @@ export interface ITour {
     category: mongoose.Schema.Types.ObjectId,
     generalDescription: string,
     dailyItineraryDescription: string,
-    reviews: IReview[],
+    reviews: mongoose.Schema.Types.ObjectId[],
     averageRating: number,
     slug: string,
 };

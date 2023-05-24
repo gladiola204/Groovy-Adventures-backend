@@ -10,7 +10,7 @@ async function createTour(req: Request, res: Response) {
     const { title, category, generalDescription, dailyItineraryDescription, price, availability, startDate, endDate } = req.body;
 
     checkDataExistence(res,
-        [req.body, title, category, startDate, endDate, price, availability, generalDescription, dailyItineraryDescription], 
+        [req.body, title, category, startDate, endDate, price, availability, generalDescription, dailyItineraryDescription, req.files], 
         "Please fill in all fields", 
         true
     );
