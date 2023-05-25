@@ -16,12 +16,12 @@ const reviewSchema = new Schema<IReviewDocument, IReviewModel>({
     },
     partialRatings: {
         type: {
-            cleanliness: { type: Number, min: 0, max: 5, required: [true, ''] },
-            valuePrice: { type: Number, required: [true, ''] },
-            food: { type: Number, required: [true, ''] },
-            communication: { type: Number, required: [true, ''] },
-            attractions: { type: Number, required: [true, ''] },
-            atmosphere: { type: Number, required: [true, ''] },
+            cleanliness: { type: Number, min: 1, max: 5, required: [true, ''] },
+            valuePrice: { type: Number, min: 1, max: 5, required: [true, ''] },
+            food: { type: Number, min: 1, max: 5, required: [true, ''] },
+            communication: { type: Number, min: 1, max: 5, required: [true, ''] },
+            attractions: { type: Number, min: 1, max: 5, required: [true, ''] },
+            atmosphere: { type: Number, min: 1, max: 5, required: [true, ''] },
         },
         required: [true, 'Add a partial ratings']
     },
@@ -32,20 +32,18 @@ const reviewSchema = new Schema<IReviewDocument, IReviewModel>({
     comment: {
         type: String,
         default: '',
-        minlength: 100,
-        maxlength: 250,
+        minlength: 11,
+        maxlength: 249,
+        trim: true,
     },
 })
 
 reviewSchema.pre('save', function(next: (err?: Error) => void) {
-    let summary = 0;
-    let numberOfProp = 0;
-    Object.entries(this.partialRatings).forEach(([rate, value]) => {
-       summary += value; 
-       numberOfProp += 1;
-    });
+    const { cleanliness, valuePrice, food, communication, attractions, atmosphere } = this.partialRatings;
+    
+    let summary = cleanliness + valuePrice + food + communication + attractions + atmosphere;
 
-    this.averagePartialRating = summary / numberOfProp;
+    this.averagePartialRating = Math.round(summary / 6);
 
     next();
 })
@@ -64,7 +62,7 @@ reviewSchema.post('save', async function (doc: IReviewDocument, next: (err?: Err
     }
   
     const tour = await Tour.findByIdAndUpdate(tourID, { 
-        averageRatings: averageRatings[0].average,
+        averageRating: Math.round(averageRatings[0].average),
         $push: { reviews: doc._id }
     });
 

@@ -62,7 +62,6 @@ const tourSchema = new mongoose.Schema<ITourDocument, ITourModel>({
         type: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Review',
-            required: [true, 'Please add a category'],
         }],
         default: [] as unknown as undefined[],
     },

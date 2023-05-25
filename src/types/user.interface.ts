@@ -1,15 +1,15 @@
-import { Types } from "mongoose";
+import { Types, Model, Document } from "mongoose";
 
-interface IUser {
-    _id: Types.ObjectId,
+export interface IUser {
     login: string,
     email: string,
     password: string,
     phone: string,
     emailVerified: boolean,
-    createdAt: Date,
-    updatedAt: Date,
     role: string,
+    purchasedTourIds: Types.ObjectId[] | [],
 }
 
-export default IUser;
+export interface IUserDocument extends IUser, Document {}
+
+export interface IUserModel extends Model<IUserDocument> {}

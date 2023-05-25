@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import Token from "../../models/tokenModel";
 import User from "../../models/userModel";
-import IUser from "../../types/user.interface";
 import { generateToken } from "../../utils/tokenUtils";
 import checkDataExistence from "../../utils/validators/checkDataExistence";
 import emailValidator from "../../utils/validators/emailValidator";
@@ -23,7 +22,7 @@ async function loginAdmin(req: Request, res: Response) {
         throw new Error("Invalid email address format.");
     };
 
-    const userExists: IUser | null = await User.findOne({ email });
+    const userExists = await User.findOne({ email });
 
     if(userExists === null) {
         res.status(400);

@@ -3,7 +3,6 @@ import checkDataExistence from '../../utils/validators/checkDataExistence';
 import emailValidator from '../../utils/validators/emailValidator';
 import Token from '../../models/tokenModel';
 import User from '../../models/userModel';
-import IUser from '../../types/user.interface';
 import { generateToken } from '../../utils/tokenUtils';
 import bcryptjs from 'bcryptjs';
 
@@ -23,13 +22,13 @@ async function loginUser(req: Request, res: Response) {
         throw new Error("Invalid email address format.");
     };
 
-    const userExists: IUser | null = await User.findOne({ email });
+    const userExists = await User.findOne({ email });
 
     if(userExists === null) {
         res.status(400);
         throw new Error("User doesn't exist. Please sign up.")
     }
-    const { _id, emailVerified, login, phone, role } = userExists;
+    const { _id, emailVerified, login, phone, role, purchasedTourIds } = userExists;
 
     // Check if password is correct
     const isPasswordCorrect = await bcryptjs.compare(password, userExists.password);
@@ -53,7 +52,7 @@ async function loginUser(req: Request, res: Response) {
     }).save();
 
     res.status(200).json({
-        _id, login, email, phone, token, role,
+        _id, login, email, phone, token, role, purchasedTourIds
     });
 };
 

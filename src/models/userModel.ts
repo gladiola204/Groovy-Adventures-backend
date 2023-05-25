@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 import bcryptjs from 'bcryptjs';
+import { IUserDocument, IUserModel } from "../types/user.interface";
 
-const userSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema<IUserDocument, IUserModel>({
     login: {
         type: String,
         required: [true, "Please add a login"],
@@ -34,6 +35,13 @@ const userSchema = new mongoose.Schema({
     role: {
         type: String,
         default: "user",
+    },
+    purchasedTourIds: {
+        type: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Tour',
+        }],
+        default: [] as unknown as undefined[],
     }
 }, {
     timestamps: true,

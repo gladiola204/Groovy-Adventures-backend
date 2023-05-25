@@ -21,7 +21,7 @@ export interface ITour {
     category: mongoose.Schema.Types.ObjectId,
     generalDescription: string,
     dailyItineraryDescription: string,
-    reviews: mongoose.Schema.Types.ObjectId[],
+    reviews: mongoose.Schema.Types.ObjectId[] | [],
     averageRating: number,
     slug: string,
 };

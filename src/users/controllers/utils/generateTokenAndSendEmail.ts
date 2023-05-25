@@ -1,10 +1,13 @@
 import { Request, Response } from "express";
-import IUser from "../../../types/user.interface";
+import { Document, Types } from "mongoose";
 import Token from "../../../models/tokenModel";
 import { generateToken } from "../../../utils/tokenUtils";
 import sendEmail from "../../../utils/sendEmail";
+import { IUserDocument } from "../../../types/user.interface";
 
-const generateTokenAndSendEmail = async (req: Request, res: Response, user: IUser, actionType: "confirmEmail" | "resetPasword") => {
+const generateTokenAndSendEmail = async (req: Request, res: Response, user: (Document<unknown, {}, IUserDocument> & Omit<IUserDocument & {
+    _id: Types.ObjectId;
+}, never>), actionType: "confirmEmail" | "resetPasword") => {
     const { email, login, _id } = user;
 
         // Generate token 
