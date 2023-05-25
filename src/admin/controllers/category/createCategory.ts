@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
-import checkDataExistence from "../../utils/validators/checkDataExistence";
-import Category from "../../models/categoryModel";
-import uploadImages from "./utils/uploadImages";
+import checkDataExistence from "../../../utils/validators/checkDataExistence";
+import Category from "../../../models/categoryModel";
+import uploadImages from "../utils/uploadImages";
+
 
 async function createCategory(req: Request, res: Response) {
     const { title } = req.body;

@@ -2,8 +2,7 @@ import { Request, Response } from "express";
 import checkDataExistence from "../../utils/validators/checkDataExistence";
 import Tour from "../../models/tourModel";
 import Review from "../../models/reviewModel";
-import mongoose, { ObjectId } from "mongoose";
-import User from "../../models/userModel";
+import { ObjectId } from "mongoose";
 
 async function createReview(req: Request, res: Response) {
     const { slug } = req.params;

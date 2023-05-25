@@ -4,12 +4,12 @@ import { catchAsync } from '../utils/catchAsync';
 import { protection } from '../middlewares/authMiddleware';
 import adminProtection from '../middlewares/adminAuthMiddleware';
 import { upload } from '../utils/uploadFiles';
-import createTour from './controllers/createTour';
-import createCategory from './controllers/createCategory';
-import updateTour from './controllers/updateTour';
-import deleteTour from './controllers/deleteTour';
-import updateCategory from './controllers/updateCategory';
-import deleteCategory from './controllers/deleteCategory';
+import createTour from './controllers/tour/createTour';
+import createCategory from './controllers/category/createCategory';
+import updateTour from './controllers/tour/updateTour';
+import deleteTour from './controllers/tour/deleteTour';
+import updateCategory from './controllers/category/updateCategory';
+import deleteCategory from './controllers/category/deleteCategory';
 
 const adminRouter = Router();
 
@@ -22,7 +22,6 @@ adminRouter.delete('/tours/:slug', catchAsync(protection), adminProtection, catc
 adminRouter.post('/categories', catchAsync(protection), adminProtection, upload.single('icon'), catchAsync(createCategory));
 adminRouter.patch('/categories/:slug', catchAsync(protection), adminProtection, upload.single('icon'), catchAsync(updateCategory));
 adminRouter.delete('/categories/:slug', catchAsync(protection), adminProtection, catchAsync(deleteCategory));
-
 
 
 export default adminRouter;

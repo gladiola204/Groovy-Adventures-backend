@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import deleteImages from "./utils/deleteImages";
-import Category from "../../models/categoryModel";
+import Category from "../../../models/categoryModel";
+import deleteImages from "../utils/deleteImages";
+
 
 async function deleteCategory(req: Request, res: Response) {
     const { slug } = req.params;

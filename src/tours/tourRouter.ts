@@ -4,19 +4,16 @@ import getTour from "./controllers/getTour";
 import filterTours from "./controllers/filterTours";
 import { protection } from "../middlewares/authMiddleware";
 import createReview from "./controllers/createReview";
+import deleteReview from "./controllers/deleteReview";
 
 
 const toursRouter = Router();
 
-// pojedynczy produkt
 toursRouter.get('/:slug', catchAsync(getTour));
-// produkty z danej kategorii plus filtracje
 toursRouter.get('/', catchAsync(filterTours));
 
-// dodawanie recenzji
 toursRouter.post('/:slug/reviews', catchAsync(protection), catchAsync(createReview));
-// usuwanie recenzji
-
+toursRouter.delete('/reviews', catchAsync(protection), catchAsync(deleteReview));
 
 // Last minutes
 

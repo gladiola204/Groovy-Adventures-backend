@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
-import checkDataExistence from "../../utils/validators/checkDataExistence";
-import Category from "../../models/categoryModel";
-import uploadImages from "./utils/uploadImages";
-import deleteImages from "./utils/deleteImages";
+import Category from "../../../models/categoryModel";
+import checkDataExistence from "../../../utils/validators/checkDataExistence";
+import deleteImages from "../utils/deleteImages";
+import uploadImages from "../utils/uploadImages";
+
 
 async function updateCategory(req: Request, res: Response) {
     const { title } = req.body;

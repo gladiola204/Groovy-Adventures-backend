@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import Tour from "../../models/tourModel";
-import deleteImages from "./utils/deleteImages";
+import Tour from "../../../models/tourModel";
+import deleteImages from "../utils/deleteImages";
 
 async function deleteTour(req: Request, res: Response) {
     const { slug } = req.params;

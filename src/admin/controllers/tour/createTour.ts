@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import checkDataExistence from "../../utils/validators/checkDataExistence";
-import Tour from "../../models/tourModel";
-import Category from "../../models/categoryModel";
-import uploadImages from "./utils/uploadImages";
+import checkDataExistence from "../../../utils/validators/checkDataExistence";
+import Tour from "../../../models/tourModel";
+import Category from "../../../models/categoryModel";
+import uploadImages from "../utils/uploadImages";
 
 async function createTour(req: Request, res: Response) {
     //const { title, categories, schedule, description } = req.body;

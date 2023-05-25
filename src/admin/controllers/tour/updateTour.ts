@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import checkDataExistence from "../../utils/validators/checkDataExistence";
-import Category from "../../models/categoryModel";
-import Tour from "../../models/tourModel";
-import uploadImages from "./utils/uploadImages";
-import deleteImages from "./utils/deleteImages";
-import updateSlug from "../../utils/updateSlug";
+import checkDataExistence from "../../../utils/validators/checkDataExistence";
+import Category from "../../../models/categoryModel";
+import Tour from "../../../models/tourModel";
+import uploadImages from "../utils/uploadImages";
+import deleteImages from "../utils/deleteImages";
+import updateSlug from "../../../utils/updateSlug";
 
 async function updateTour(req: Request, res: Response) {
     const { title, 

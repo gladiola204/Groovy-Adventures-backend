@@ -76,5 +76,3 @@ reviewSchema.post('save', async function (doc: IReviewDocument, next: (err?: Err
 const Review = model("Review", reviewSchema);
 
 export default Review;
-
-// zakupione tours
