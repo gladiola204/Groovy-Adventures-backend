@@ -69,10 +69,53 @@ const tourSchema = new mongoose.Schema<ITourDocument, ITourModel>({
         type: Number,
         default: 0
     },
+    discount: {
+            isDiscounted: {
+                type: Boolean,
+                default: false,
+            },
+            percentageOfDiscount: {
+                type: Number,
+                required: function(this: ITourDocument) {
+                    if(this.discount.isDiscounted === true) {
+                        return [true, 'Please add a percentage of discount']
+                    };
+                    return false;
+                },
+            },
+            expiresAt: {
+                type: Date,
+                required: function(this: ITourDocument) {
+                    if(this.discount.isDiscounted === true) {
+                        return [true, 'Please add an expires date']
+                    };
+                    return false;
+                },
+            },
+    },
+    lastMinute: {
+            isLastMinute: {
+                type: Boolean,
+                default: false,
+            },
+            expiresAt: {
+                type: Date,
+                required: function(this: ITourDocument) {
+                    if(this.lastMinute.isLastMinute === true) {
+                        return [true, 'Please add a expires date of Last Minute']
+                    };
+                    return false;
+                },
+            },
+    },
+    purchasesCount: {
+        type: Number,
+        default: 0,
+    },
     slug: {
         type: String, 
         unique: true
-    }
+    },
 }, {
     timestamps: true,
 });

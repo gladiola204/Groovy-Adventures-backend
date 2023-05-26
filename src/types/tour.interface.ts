@@ -23,6 +23,16 @@ export interface ITour {
     dailyItineraryDescription: string,
     reviews: mongoose.Schema.Types.ObjectId[] | [],
     averageRating: number,
+    discount: {
+        isDiscounted: boolean,
+        percentageOfDiscount?: number,
+        expiresAt?: Date,
+    },
+    lastMinute: {
+        isLastMinute: boolean
+        expiresAt?: Date,
+    },
+    purchasesCount: number;
     slug: string,
 };
 

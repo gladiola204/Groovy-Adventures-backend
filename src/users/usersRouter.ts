@@ -11,6 +11,7 @@ import resendVerificationEmail from './controllers/resendVerificationEmail';
 import resetPassword from './controllers/resetPassword';
 import statusUser from './controllers/statusUser';
 import { updateUser } from './controllers/updateUser';
+import purchaseTour from './controllers/purchaseTour';
 
 const usersRouter = express.Router();
 
@@ -24,5 +25,6 @@ usersRouter.patch('/updateuser', catchAsync(protection), catchAsync(updateUser))
 usersRouter.patch('/changepassword', catchAsync(protection), catchAsync(changePassword));
 usersRouter.post('/forgotpassword', catchAsync(forgotPassword));
 usersRouter.patch('/resetpassword/:token', catchAsync(resetPassword));
+usersRouter.post('/purchase/:slug', catchAsync(protection), catchAsync(purchaseTour));
 
 export default usersRouter;
