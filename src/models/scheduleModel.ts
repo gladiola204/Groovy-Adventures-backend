@@ -23,21 +23,6 @@ const scheduleSchema = new Schema<IScheduleDocument, IScheduleModel>({
         type: Number,
         required: [true, "Please add a quantity"],
     },
-    lastMinute: {
-        isLastMinute: {
-            type: Boolean,
-            default: false,
-        },
-        expiresAt: {
-            type: Date,
-            required: function(this: IScheduleDocument) {
-                if(this.lastMinute.isLastMinute === true) {
-                    return [true, 'Please add a expires date of Last Minute']
-                };
-                return false;
-            },
-        },
-    },
     discount: {
         isDiscounted: {
             type: Boolean,

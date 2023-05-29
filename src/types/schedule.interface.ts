@@ -7,10 +7,6 @@ export interface ISchedule {
     endDate: Date,
     price: number,
     availability: number,
-    lastMinute: {
-        isLastMinute: boolean,
-        expiresAt?: Date,
-    },
     discount: {
         isDiscounted: boolean,
         percentageOfDiscount?: number,

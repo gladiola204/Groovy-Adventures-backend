@@ -13,6 +13,10 @@ interface ISearchCriteria {
         }
     };
     category?: Types.ObjectId;
+    lastMinute?: {
+        isLastMinute: boolean;
+        expiresAt: { $gte: Date };
+    } 
 }
 
 interface IQuery {
@@ -21,10 +25,11 @@ interface IQuery {
     people?: string,
     startDate?: string,
     endDate?: string,
+    lastMinute?: string,
 }
 
 async function filterTours(req: Request, res: Response) {
-    const { category, price, people, startDate, endDate }: IQuery  = req.query;
+    const { category, price, people, startDate, endDate, lastMinute }: IQuery  = req.query;
 
   // Tworzenie obiektu z kryteriami wyszukiwania na podstawie przekazanych parametrów zapytania
   let searchCriteria: ISearchCriteria = {};
@@ -51,7 +56,12 @@ async function filterTours(req: Request, res: Response) {
         searchCriteria.category = categoryDB._id;
     }
 
-    console.log(searchCriteria);
+    if(lastMinute) {
+        searchCriteria.lastMinute = {
+            isLastMinute: true,
+            expiresAt: { $gte: new Date() },
+        }
+    }
 
     const filteredTours = await Tour.find(searchCriteria);
     

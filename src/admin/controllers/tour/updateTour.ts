@@ -8,16 +8,16 @@ import updateSlug from "../../../utils/updateSlug";
 import Schedule from "../../../models/scheduleModel";
 import { ObjectId } from "mongoose";
 
-async function updateTour(req: Request, res: Response) {
+async function updateTour(req: Request, res: Response) {    
     const { title, 
         category, 
         generalDescription, 
         dailyItineraryDescription, 
         updatedSchedules,
         newSchedules,
-        deleteSchedules,
+        deletedSchedules,
         publicIds,
-        } = req.body;
+        } = req.body;    
     const { slug } = req.params;
     const scheduleIds: ObjectId[] = [];
     let images = [];
@@ -66,7 +66,7 @@ async function updateTour(req: Request, res: Response) {
     };
 
     if(updatedSchedules) {
-        if(Array.isArray(updatedSchedules)) {
+        if(!Array.isArray(updatedSchedules)) {
             res.status(400);
             throw new Error("Invalid format of updated schedule's data. Please provide an array.")
         }
@@ -103,9 +103,9 @@ async function updateTour(req: Request, res: Response) {
     };
 
     if(newSchedules) {
-        if(Array.isArray(updatedSchedules)) {
+        if(!Array.isArray(newSchedules)) {
             res.status(400);
-            throw new Error("Invalid format of updated schedule's data. Please provide an array.")
+            throw new Error("Invalid format of new schedule's data. Please provide an array.")
         };
 
         for (const scheduleData of newSchedules) {
@@ -128,14 +128,14 @@ async function updateTour(req: Request, res: Response) {
         }
     };
 
-    if(deleteSchedules) {
-        if(Array.isArray(updatedSchedules)) {
+    if(deletedSchedules) {
+        if(!Array.isArray(deletedSchedules)) {
             res.status(400);
-            throw new Error("Invalid format of updated schedule's data. Please provide an array.")
+            throw new Error("Invalid format of deleted schedule's data. Please provide an array.")
         };
         const arrayOfSchedulesToFilter: string[] = [];
 
-        for (const scheduleData of deleteSchedules) {
+        for (const scheduleData of deletedSchedules) {
             if(!scheduleData.hasOwnProperty("_id")) {
                 res.status(400);
                 throw new Error("Please fill in schedule's id");
@@ -177,7 +177,7 @@ async function updateTour(req: Request, res: Response) {
     if(updatedTour === null) {
         res.status(404);
         throw new Error("Tour not found");
-    }
+    };
 
     res.status(200).json(updatedTour);
 };

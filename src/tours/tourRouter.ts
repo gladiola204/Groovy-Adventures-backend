@@ -5,19 +5,19 @@ import filterTours from "./controllers/filterTours";
 import { protection } from "../middlewares/authMiddleware";
 import createReview from "./controllers/createReview";
 import deleteReview from "./controllers/deleteReview";
+import getBestsellers from "./controllers/getBestsellers";
+import getLastMinutes from "./controllers/getLastMinutes";
 
 
 const toursRouter = Router();
+
+toursRouter.get('/bestsellers', catchAsync(getBestsellers));
+toursRouter.get('/lastminutes', catchAsync(getLastMinutes));
 
 toursRouter.get('/:slug', catchAsync(getTour));
 toursRouter.get('/', catchAsync(filterTours));
 
 toursRouter.post('/:slug/reviews', catchAsync(protection), catchAsync(createReview));
 toursRouter.delete('/reviews', catchAsync(protection), catchAsync(deleteReview));
-
-// Last minutes
-
-// bestsellers
-
 
 export default toursRouter;
