@@ -27,24 +27,13 @@ const tourSchema = new mongoose.Schema<ITourDocument, ITourModel>({
             default: false,
         },
     }],
-    schedule: [{
-        startDate: {
-            type: Date,  // np. new Date('2023-07-01'),
-            required: [true, "Please add a start date of journey"]
-        },
-        endDate: {
-            type: Date,
-            required: [true, "Please add an end date of journey"]
-        },
-        price: {
-            type: Number,
-            required: [true, "Please add a price"]
-        },
-        availability: {
-            type: Number,
-            required: [true, "Please add a quantity"],
-        },
-    }],
+    scheduleIds: {
+        type: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Schedule',
+        }],
+        default: [] as unknown as undefined[],
+    },
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category',
@@ -68,45 +57,6 @@ const tourSchema = new mongoose.Schema<ITourDocument, ITourModel>({
     averageRating: {
         type: Number,
         default: 0
-    },
-    discount: {
-            isDiscounted: {
-                type: Boolean,
-                default: false,
-            },
-            percentageOfDiscount: {
-                type: Number,
-                required: function(this: ITourDocument) {
-                    if(this.discount.isDiscounted === true) {
-                        return [true, 'Please add a percentage of discount']
-                    };
-                    return false;
-                },
-            },
-            expiresAt: {
-                type: Date,
-                required: function(this: ITourDocument) {
-                    if(this.discount.isDiscounted === true) {
-                        return [true, 'Please add an expires date']
-                    };
-                    return false;
-                },
-            },
-    },
-    lastMinute: {
-            isLastMinute: {
-                type: Boolean,
-                default: false,
-            },
-            expiresAt: {
-                type: Date,
-                required: function(this: ITourDocument) {
-                    if(this.lastMinute.isLastMinute === true) {
-                        return [true, 'Please add a expires date of Last Minute']
-                    };
-                    return false;
-                },
-            },
     },
     purchasesCount: {
         type: Number,

@@ -12,26 +12,12 @@ export interface ITour {
         },
         isMain: boolean,
     }],
-    schedule: [{
-        startDate: Date,
-        endDate: Date,
-        price: number,
-        availability: number,
-    }],
+    scheduleIds: mongoose.Schema.Types.ObjectId[] | [],
     category: mongoose.Schema.Types.ObjectId,
     generalDescription: string,
     dailyItineraryDescription: string,
     reviews: mongoose.Schema.Types.ObjectId[] | [],
     averageRating: number,
-    discount: {
-        isDiscounted: boolean,
-        percentageOfDiscount?: number,
-        expiresAt?: Date,
-    },
-    lastMinute: {
-        isLastMinute: boolean
-        expiresAt?: Date,
-    },
     purchasesCount: number;
     slug: string,
 };

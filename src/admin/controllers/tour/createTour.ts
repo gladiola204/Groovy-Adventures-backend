@@ -3,24 +3,17 @@ import checkDataExistence from "../../../utils/validators/checkDataExistence";
 import Tour from "../../../models/tourModel";
 import Category from "../../../models/categoryModel";
 import uploadImages from "../utils/uploadImages";
+import Schedule from "../../../models/scheduleModel";
+import { ObjectId } from "mongoose";
 
 async function createTour(req: Request, res: Response) {
-    //const { title, categories, schedule, description } = req.body;
-    //const { startDate, endDate, price, availability } = schedule;
-    const { title, category, generalDescription, dailyItineraryDescription, price, availability, startDate, endDate } = req.body;
+    const { title, category, generalDescription, dailyItineraryDescription, schedules } = req.body;
 
     checkDataExistence(res,
-        [req.body, title, category, startDate, endDate, price, availability, generalDescription, dailyItineraryDescription, req.files], 
+        [req.body, title, category, generalDescription, dailyItineraryDescription, req.files], 
         "Please fill in all fields", 
         true
     );
-
-    const schedule = {
-        startDate: new Date(startDate),
-        endDate: new Date(endDate),
-        price: Number(price),
-        availability: Number(availability),
-    }
 
     // Check if title is unique
     const titleDB = await Tour.findOne({ title });
@@ -42,8 +35,28 @@ async function createTour(req: Request, res: Response) {
     const uploadedImages = await uploadImages(req, res);
 
     const tour = await new Tour({
-        title, category: categoryDB._id, schedule, generalDescription, dailyItineraryDescription, images: uploadedImages,
+        title, category: categoryDB._id, generalDescription, dailyItineraryDescription, images: uploadedImages,
     }).save();
+
+    if(schedules) {
+        const scheduleArray: ObjectId[] = [];
+        for (const scheduleData of schedules) {
+            if(!scheduleData.hasOwnProperty("startDate") || !scheduleData.hasOwnProperty("endDate") || !scheduleData.hasOwnProperty("price") || !scheduleData.hasOwnProperty("availability")) {
+                res.status(400);
+                throw new Error("Please fill in all required data in schedule");
+            };
+            
+            const newSchedule = new Schedule({
+              tourId: tour._id,
+              ...scheduleData
+            });
+    
+            scheduleArray.push(newSchedule._id);
+        }
+    
+        tour.scheduleIds = [...tour.scheduleIds, ...scheduleArray];
+        await tour.save();
+    }
 
     res.status(201).json(tour);
 }
