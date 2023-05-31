@@ -9,24 +9,13 @@ const tourSchema = new mongoose.Schema<ITourDocument, ITourModel>({
         required: [true, "Please add a title"],
         unique: true,
     },
-    images: [{
-        fileData: {
-            type: {
-                fileName: {type: String, required: [true, 'Please add a file name']},
-                filePath: {type: String, required: [true, 'Please add a file path']},
-                filePublicId: {type: String, required: [true, 'Please add a file public ID']},
-                fileType: {type: String, required: [true, 'Please add a file type']},
-                fileSize: {type: String, required: [true, 'Please add a file size']},
-            },
-            default: {},
-            required: [true, "Please add an image's url"]
-        },
-        isMain: {
-            type: Boolean,
-            required: [true, "Please write 'false' if image is not main, and 'true' if it is"],
-            default: false,
-        },
-    }],
+    images: {
+        type: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Image',
+        }],
+        required: [true, "Please add images"],
+    },
     scheduleIds: {
         type: [{
             type: mongoose.Schema.Types.ObjectId,

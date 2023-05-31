@@ -2,16 +2,7 @@ import mongoose, { Document, Model } from "mongoose";
 
 export interface ITour {
     title: string,
-    images: [{
-        fileData: {
-            fileName: string,
-            filePath: string,
-            filePublicId: string,
-            fileType: string,
-            fileSize: string,
-        },
-        isMain: boolean,
-    }],
+    images: mongoose.Schema.Types.ObjectId[],
     scheduleIds: mongoose.Schema.Types.ObjectId[] | [],
     category: mongoose.Schema.Types.ObjectId,
     generalDescription: string,

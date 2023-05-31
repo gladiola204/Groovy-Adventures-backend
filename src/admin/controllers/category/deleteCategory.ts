@@ -13,7 +13,8 @@ async function deleteCategory(req: Request, res: Response) {
         throw new Error("Tour not found");
     };
 
-    deleteImages(res, category.icon.filePublicId);
+    await deleteImages(res, category.icon.toString());
+    await category.deleteOne();
     
     res.status(200).json({ 
         success: true,

@@ -12,13 +12,9 @@ async function deleteTour(req: Request, res: Response) {
         throw new Error("Tour not found");
     };
 
-    const publicIds: string[] = [];
+    await deleteImages(res, tour.images);
 
-    tour.images.map((image) => {
-        publicIds.push(image.fileData.filePublicId);
-    });
-
-    deleteImages(res, publicIds);
+    await tour.deleteOne();
     
     res.status(200).json({ 
         success: true,

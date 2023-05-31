@@ -5,6 +5,7 @@ import Category from "../../../models/categoryModel";
 import uploadImages from "../utils/uploadImages";
 import Schedule from "../../../models/scheduleModel";
 import { ObjectId } from "mongoose";
+import Image from "../../../models/imageModel";
 
 async function createTour(req: Request, res: Response) {
     const { title, category, generalDescription, dailyItineraryDescription, schedules } = req.body;
@@ -34,11 +35,19 @@ async function createTour(req: Request, res: Response) {
     // Handle images upload
     const uploadedImages = await uploadImages(req, res);
 
+    const arrayOfUploadedImagesIds: ObjectId[] = [];
+
+    for (const setOfImages of uploadedImages) {
+        const uploadedSetOfImages = await new Image({ ...setOfImages }).save();
+
+        arrayOfUploadedImagesIds.push(uploadedSetOfImages._id);
+    }
+
     const tour = await new Tour({
-        title, category: categoryDB._id, generalDescription, dailyItineraryDescription, images: uploadedImages,
+        title, category: categoryDB._id, generalDescription, dailyItineraryDescription, images: arrayOfUploadedImagesIds,
     }).save();
 
-    if(schedules) {
+    if(schedules) { //DO TESTÓW TYLKO
         const scheduleArray: ObjectId[] = [];
         for (const scheduleData of schedules) {
             if(!scheduleData.hasOwnProperty("startDate") || !scheduleData.hasOwnProperty("endDate") || !scheduleData.hasOwnProperty("price") || !scheduleData.hasOwnProperty("availability")) {
@@ -46,10 +55,10 @@ async function createTour(req: Request, res: Response) {
                 throw new Error("Please fill in all required data in schedule");
             };
             
-            const newSchedule = new Schedule({
-              tourId: tour._id,
-              ...scheduleData
-            });
+            const newSchedule = await new Schedule({
+                tourId: tour._id,
+                ...scheduleData
+            }).save();
     
             scheduleArray.push(newSchedule._id);
         }

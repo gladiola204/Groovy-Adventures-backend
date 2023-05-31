@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import checkDataExistence from "../../../utils/validators/checkDataExistence";
 import Category from "../../../models/categoryModel";
 import uploadImages from "../utils/uploadImages";
+import Image from "../../../models/imageModel";
+import { IImageDocument } from "../../../types/image.interface";
 
 
 async function createCategory(req: Request, res: Response) {
@@ -17,9 +19,16 @@ async function createCategory(req: Request, res: Response) {
 
     const uploadedIcon = await uploadImages(req, res);
 
+    let imageId: IImageDocument | null = null
+    for (const uploadedSingleIcon of uploadedIcon) {
+        imageId = await new Image({
+            ...uploadedSingleIcon
+        }).save();
+    }
+
     const category = await new Category({
         title,
-        icon: uploadedIcon[0].fileData
+        icon: imageId?._id
     }).save();
 
     res.status(201).json(category);

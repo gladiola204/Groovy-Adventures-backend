@@ -3,6 +3,8 @@ import Category from "../../../models/categoryModel";
 import checkDataExistence from "../../../utils/validators/checkDataExistence";
 import deleteImages from "../utils/deleteImages";
 import uploadImages from "../utils/uploadImages";
+import Image from "../../../models/imageModel";
+import { IImageDocument } from "../../../types/image.interface";
 
 
 async function updateCategory(req: Request, res: Response) {
@@ -34,14 +36,23 @@ async function updateCategory(req: Request, res: Response) {
 
     const uploadedIcon = await uploadImages(req, res);
     
+    let imageId: IImageDocument | null = null
+    if(uploadedIcon.length === 1) {
+        for (const uploadedSingleIcon of uploadedIcon) {
+            imageId = await new Image({
+                ...uploadedSingleIcon
+            }).save();
+        };
+    }
+
     const updatedCategory = await Category.findOneAndUpdate({ slug }, {
         title,
-        icon: uploadedIcon.length === 0 ? category.icon : uploadedIcon[0].fileData
+        icon: uploadedIcon.length === 0 ? category.icon : imageId,
     },
     {
         new: true,
         runValidators: true,
-    });
+    }).populate("icon");
 
     if(updatedCategory === null) {
         res.status(500);
@@ -49,7 +60,7 @@ async function updateCategory(req: Request, res: Response) {
     }
 
     if(uploadedIcon.length === 1) {
-        await deleteImages(res, category.icon.filePublicId);
+        await deleteImages(res, category.icon.toString());
     };
 
     res.status(200).json(updatedCategory);

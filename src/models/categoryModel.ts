@@ -9,13 +9,8 @@ const categorySchema = new mongoose.Schema({
         unique: true,
     },
     icon: {
-        type: {
-            fileName: {type: String, required: [true, 'Please add a file name']},
-            filePath: {type: String, required: [true, 'Please add a file path']},
-            filePublicId: {type: String, required: [true, 'Please add a file public ID']},
-            fileType: {type: String, required: [true, 'Please add a file type']},
-            fileSize: {type: String, required: [true, 'Please add a file size']},
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Image',
         required: [true, 'Please add an icon']
     },
     slug: {

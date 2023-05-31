@@ -7,6 +7,7 @@ import deleteImages from "../utils/deleteImages";
 import updateSlug from "../../../utils/updateSlug";
 import Schedule from "../../../models/scheduleModel";
 import { ObjectId } from "mongoose";
+import Image from "../../../models/imageModel";
 
 async function updateTour(req: Request, res: Response) {    
     const { title, 
@@ -16,11 +17,11 @@ async function updateTour(req: Request, res: Response) {
         updatedSchedules,
         newSchedules,
         deletedSchedules,
-        publicIds,
+        idOfImagesToRemove,
         } = req.body;    
     const { slug } = req.params;
     const scheduleIds: ObjectId[] = [];
-    let images = [];
+    let images: ObjectId[] = [];
 
     checkDataExistence(res, [req.body], "Please update at least one field", true);
 
@@ -48,22 +49,30 @@ async function updateTour(req: Request, res: Response) {
         };
     };
     
-    if(publicIds) {
-        await deleteImages(res, publicIds);
-    };
+    if(idOfImagesToRemove) {
+        const arrayOfDeletedImageIds = await deleteImages(res, idOfImagesToRemove);
 
-    // Handle images upload
-    const uploadedImages = await uploadImages(req, res);
-    images.push(...uploadedImages);
-    
-    if(publicIds) {
-        const filteredImages = tour.images.filter(image => {
-            return !publicIds.includes(image.fileData.filePublicId);
-        });
-        images.push(...filteredImages);
+        if(arrayOfDeletedImageIds) {
+            const filteredImages = tour.images.filter(imageId => {
+                return !arrayOfDeletedImageIds.includes(imageId);
+            });
+            images.push(...filteredImages);
+        } else {
+            res.status(500);
+            throw new Error("An error occurred while deleting images")
+        };
     } else {
         images.push(...tour.images);
     };
+
+    // Handle images upload
+    const uploadedImages: any[] = await uploadImages(req, res);
+
+    for (const setOfImages of uploadedImages) {
+        const uploadedSetOfImages = await new Image({ ...setOfImages }).save();
+
+        images.push(uploadedSetOfImages._id);
+    }
 
     if(updatedSchedules) {
         if(!Array.isArray(updatedSchedules)) {
@@ -172,7 +181,7 @@ async function updateTour(req: Request, res: Response) {
             new: true,
             runValidators: true,
         }
-    ).populate('scheduleIds');
+    ).populate('scheduleIds').populate("images");
 
     if(updatedTour === null) {
         res.status(404);
