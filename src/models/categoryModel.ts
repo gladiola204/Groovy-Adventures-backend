@@ -1,7 +1,8 @@
 import mongoose from "mongoose"
 import updateSlug from "../utils/updateSlug";
+import { ICategoryDocument, ICategoryModel } from "../types/category.interface";
 
-const categorySchema = new mongoose.Schema({
+const categorySchema = new mongoose.Schema<ICategoryDocument, ICategoryModel>({
     title: {
         type: String,
         required: [true, 'Please add a title'],

@@ -5,11 +5,14 @@ import deleteImages from "../utils/deleteImages";
 import uploadImages from "../utils/uploadImages";
 import Image from "../../../models/imageModel";
 import { IImageDocument } from "../../../types/image.interface";
+import { startSession } from "mongoose";
+import { ICategoryDocument } from "../../../types/category.interface";
 
 
 async function updateCategory(req: Request, res: Response) {
     const { title } = req.body;
     const { slug } = req.params;
+    let updatedCategory: ICategoryDocument | null;
 
     checkDataExistence(res, [req.body], "Please update at least one field", true);
 
@@ -36,32 +39,45 @@ async function updateCategory(req: Request, res: Response) {
 
     const uploadedIcon = await uploadImages(req, res);
     
-    let imageId: IImageDocument | null = null
-    if(uploadedIcon.length === 1) {
-        for (const uploadedSingleIcon of uploadedIcon) {
-            imageId = await new Image({
-                ...uploadedSingleIcon
-            }).save();
+    const session = await startSession();
+    session.startTransaction();
+
+    try {
+        let imageId: IImageDocument | null = null
+        if(uploadedIcon.length === 1) {
+            for (const uploadedSingleIcon of uploadedIcon) {
+                imageId = new Image({
+                    ...uploadedSingleIcon
+                });
+                imageId.$session(session);
+                await imageId.save();
+            };
         };
+
+        if(uploadedIcon.length === 1) {
+            await deleteImages(res, category.icon.toString(), session);
+        };
+
+        updatedCategory = await Category.findOneAndUpdate({ slug }, {
+            title,
+            icon: uploadedIcon.length === 0 ? category.icon : imageId,
+        }, {
+            new: true,
+            runValidators: true,
+        }).populate("icon").session(session);
+
+        if(updatedCategory === null) {
+            res.status(500);
+            throw new Error("Category not found")
+        };
+    
+        await session.commitTransaction();
+    } catch (error) {
+        await session.abortTransaction();
+        throw new Error(`${error}`);
+    } finally {
+        session.endSession();
     }
-
-    const updatedCategory = await Category.findOneAndUpdate({ slug }, {
-        title,
-        icon: uploadedIcon.length === 0 ? category.icon : imageId,
-    },
-    {
-        new: true,
-        runValidators: true,
-    }).populate("icon");
-
-    if(updatedCategory === null) {
-        res.status(500);
-        throw new Error("Category not found")
-    }
-
-    if(uploadedIcon.length === 1) {
-        await deleteImages(res, category.icon.toString());
-    };
 
     res.status(200).json(updatedCategory);
 };

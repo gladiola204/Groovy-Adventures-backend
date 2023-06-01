@@ -2,16 +2,16 @@ import { Response } from 'express';
 import cloudinary from 'cloudinary';
 import Image from '../../../models/imageModel';
 import { IImageDocument } from '../../../types/image.interface';
-import { ObjectId } from 'mongoose';
+import { ClientSession, ObjectId } from 'mongoose';
 
-async function deleteImages(res: Response, id: ObjectId[] | string | string[]) {
+async function deleteImages(res: Response, id: ObjectId[] | string | string[], session: ClientSession | null = null) {
     const arrayOfAllImageIds: string[] = [];
 
     let stringSetOfImages: IImageDocument | null = null;
     let arrayOfImages: IImageDocument[] = [];
 
     if(typeof id === 'string') {
-        stringSetOfImages = await Image.findById(id);
+        stringSetOfImages = await Image.findById(id).session(session);
 
         if(stringSetOfImages === null) {
             res.status(404);
@@ -25,7 +25,7 @@ async function deleteImages(res: Response, id: ObjectId[] | string | string[]) {
 
     if(Array.isArray(id)) {
         for (const singleId of id) {
-            const arraySetOfImages = await Image.findById(singleId);
+            const arraySetOfImages = await Image.findById(singleId).session(session);
 
             if(arraySetOfImages === null) {
                 res.status(404);

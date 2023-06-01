@@ -4,10 +4,13 @@ import Category from "../../../models/categoryModel";
 import uploadImages from "../utils/uploadImages";
 import Image from "../../../models/imageModel";
 import { IImageDocument } from "../../../types/image.interface";
+import { startSession } from "mongoose";
+import { ICategoryDocument } from "../../../types/category.interface";
 
 
 async function createCategory(req: Request, res: Response) {
     const { title } = req.body;
+    let category: ICategoryDocument;
 
     checkDataExistence(res, [req.body, title, req.file], "Please fill in all fields", true);
 
@@ -19,17 +22,33 @@ async function createCategory(req: Request, res: Response) {
 
     const uploadedIcon = await uploadImages(req, res);
 
-    let imageId: IImageDocument | null = null
-    for (const uploadedSingleIcon of uploadedIcon) {
-        imageId = await new Image({
-            ...uploadedSingleIcon
-        }).save();
-    }
+    const session = await startSession();
+    session.startTransaction();
 
-    const category = await new Category({
-        title,
-        icon: imageId?._id
-    }).save();
+    try {
+        let imageId: IImageDocument | null = null
+        for (const uploadedSingleIcon of uploadedIcon) {
+            imageId = new Image({
+                ...uploadedSingleIcon
+            });
+            imageId.$session(session);
+            await imageId.save();
+        }
+
+        category = new Category({
+            title,
+            icon: imageId?._id
+        });
+        category.$session(session);
+        await category.save();
+
+        await session.commitTransaction();
+    } catch (error) {
+        await session.abortTransaction();
+        throw new Error(`${error}`);
+    } finally {
+        session.endSession();
+    };
 
     res.status(201).json(category);
 }

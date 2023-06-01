@@ -4,11 +4,14 @@ import Tour from "../../../models/tourModel";
 import Category from "../../../models/categoryModel";
 import uploadImages from "../utils/uploadImages";
 import Schedule from "../../../models/scheduleModel";
-import { ObjectId } from "mongoose";
+import { ObjectId, startSession } from "mongoose";
 import Image from "../../../models/imageModel";
+import { ITourDocument } from "../../../types/tour.interface";
 
 async function createTour(req: Request, res: Response) {
     const { title, category, generalDescription, dailyItineraryDescription, schedules } = req.body;
+
+    let tour: ITourDocument;
 
     checkDataExistence(res,
         [req.body, title, category, generalDescription, dailyItineraryDescription, req.files], 
@@ -27,44 +30,62 @@ async function createTour(req: Request, res: Response) {
     // Find category
     const categoryDB = await Category.findOne({title: category});
 
-    if(!categoryDB) {
+    if(categoryDB === null) {
         res.status(404)
         throw new Error("Category doesn't exist")
     };
 
-    // Handle images upload
-    const uploadedImages = await uploadImages(req, res);
+    const session = await startSession();
+    session.startTransaction();
 
-    const arrayOfUploadedImagesIds: ObjectId[] = [];
-
-    for (const setOfImages of uploadedImages) {
-        const uploadedSetOfImages = await new Image({ ...setOfImages }).save();
-
-        arrayOfUploadedImagesIds.push(uploadedSetOfImages._id);
-    }
-
-    const tour = await new Tour({
-        title, category: categoryDB._id, generalDescription, dailyItineraryDescription, images: arrayOfUploadedImagesIds,
-    }).save();
-
-    if(schedules) { //DO TESTÓW TYLKO
-        const scheduleArray: ObjectId[] = [];
-        for (const scheduleData of schedules) {
-            if(!scheduleData.hasOwnProperty("startDate") || !scheduleData.hasOwnProperty("endDate") || !scheduleData.hasOwnProperty("price") || !scheduleData.hasOwnProperty("availability")) {
-                res.status(400);
-                throw new Error("Please fill in all required data in schedule");
-            };
-            
-            const newSchedule = await new Schedule({
-                tourId: tour._id,
-                ...scheduleData
-            }).save();
+    try {
+        const uploadedImages = await uploadImages(req, res);
     
-            scheduleArray.push(newSchedule._id);
-        }
+        const arrayOfUploadedImagesIds: ObjectId[] = [];
     
-        tour.scheduleIds = [...tour.scheduleIds, ...scheduleArray];
+        for (const setOfImages of uploadedImages) {
+            const image = new Image({ ...setOfImages });
+            image.$session(session);
+
+            const uploadedSetOfImages = await image.save();
+    
+            arrayOfUploadedImagesIds.push(uploadedSetOfImages._id);
+        };
+
+        tour = new Tour({
+            title, category: categoryDB?._id, generalDescription, dailyItineraryDescription, images: arrayOfUploadedImagesIds,
+        });
+        tour.$session(session);
         await tour.save();
+
+        if(schedules) { //DO TESTÓW TYLKO
+            const scheduleArray: ObjectId[] = [];
+            for (const scheduleData of schedules) {
+                if(!scheduleData.hasOwnProperty("startDate") || !scheduleData.hasOwnProperty("endDate") || !scheduleData.hasOwnProperty("price") || !scheduleData.hasOwnProperty("availability")) {
+                    res.status(400);
+                    throw new Error("Please fill in all required data in schedule");
+                };
+                
+                const newSchedule = new Schedule({
+                    tourId: tour._id,
+                    ...scheduleData
+                });
+                newSchedule.$session(session);
+                await newSchedule.save();
+        
+                scheduleArray.push(newSchedule._id);
+            }
+        
+            tour.scheduleIds = [...tour.scheduleIds, ...scheduleArray];
+            await tour.save();
+        }
+      
+        await session.commitTransaction();
+    } catch (error) {
+        await session.abortTransaction();
+        throw new Error(`${error}`);
+    } finally {
+        session.endSession();
     }
 
     res.status(201).json(tour);
