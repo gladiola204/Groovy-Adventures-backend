@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { Types } from 'mongoose';
 
-export const generateToken = (id: Types.ObjectId, role?: "admin") => {
+export const generateToken = (id: Types.ObjectId, role: "user" | 'admin' = 'user') => {
     if(role === 'admin') {
         return jwt.sign({id}, `${process.env.JWT_SECRET}`, {expiresIn: "1h"});
     } else {

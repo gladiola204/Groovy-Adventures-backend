@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Schedule from "../../models/scheduleModel";
+import Schedule from "../../models/schedule/scheduleModel";
 
 
 async function getLastMinutes(req: Request, res: Response) {

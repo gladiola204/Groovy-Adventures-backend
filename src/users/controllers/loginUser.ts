@@ -9,6 +9,7 @@ import bcryptjs from 'bcryptjs';
 async function loginUser(req: Request, res: Response) {
     const { body } = req;
     const { email, password } = body;
+    let token: string;
 
     checkDataExistence(res, [body, email, password], "Please fill in all required fields", true);
 
@@ -42,14 +43,23 @@ async function loginUser(req: Request, res: Response) {
         throw new Error("Email has not yet been verified. Verify it to be able to log in")
     };
 
-    const token = generateToken(_id);
+    if(req.admin) {
+        token = generateToken(_id, 'admin');
 
-    // Save token to DB
-    await new Token({
-        userId: _id,
-        token,
-        expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
-    }).save();
+        await new Token({
+            userId: _id,
+            token,
+            expiresAt: Date.now() + (1 * 60 * 60 * 1000), // 1 hour
+        }).save();
+    } else {
+        token = generateToken(_id);
+    
+        await new Token({
+            userId: _id,
+            token,
+            expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
+        }).save();
+    }
 
     res.status(200).json({
         _id, login, email, phone, token, role, purchasedTourIds

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Tour from "../../models/tourModel";
+import Tour from "../../models/tour/tourModel";
 
 async function getBestsellers(req: Request, res: Response) {
     const numberOfBestsellers = Number(req.body.numberOfBestsellers) || 3;

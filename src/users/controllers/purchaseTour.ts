@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import Tour from "../../models/tourModel";
+import Tour from "../../models/tour/tourModel";
 import User from "../../models/userModel";
 import checkDataExistence from "../../utils/validators/checkDataExistence";
-import Schedule from "../../models/scheduleModel";
+import Schedule from "../../models/schedule/scheduleModel";
 import { ObjectId, startSession } from "mongoose";
 
 async function purchaseTour(req: Request, res: Response) {

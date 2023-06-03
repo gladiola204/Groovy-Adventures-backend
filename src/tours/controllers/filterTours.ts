@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Tour from "../../models/tourModel";
+import Tour from "../../models/tour/tourModel";
 import Category from "../../models/categoryModel";
 import { Types } from "mongoose";
 

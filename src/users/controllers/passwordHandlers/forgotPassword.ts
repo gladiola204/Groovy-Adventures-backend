@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import checkDataExistence from '../../utils/validators/checkDataExistence';
-import emailValidator from '../../utils/validators/emailValidator';
-import User from '../../models/userModel';
-import generateTokenAndSendEmail from './utils/generateTokenAndSendEmail';
+import checkDataExistence from '../../../utils/validators/checkDataExistence';
+import emailValidator from '../../../utils/validators/emailValidator';
+import User from '../../../models/userModel';
+import generateTokenAndSendEmail from '../utils/generateTokenAndSendEmail';
 
 
 async function forgotPassword(req: Request, res: Response) {

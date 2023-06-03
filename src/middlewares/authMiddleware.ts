@@ -2,10 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import User from "../models/userModel";
 import Token from "../models/tokenModel";
-import checkDataExistence from "../utils/validators/checkDataExistence";
 
 
-export const protection = async (req: Request, res: Response, next: NextFunction) => {
+export const protection = async (req: Request, res: Response, next: NextFunction, allowedRoles: string[]) => {
     const { authorization: authorizationHeader } = req.headers;
     const token = authorizationHeader?.split(' ')[1];
     
@@ -39,8 +38,18 @@ export const protection = async (req: Request, res: Response, next: NextFunction
     if(user._id.toString() !== tokenFromDB.userId.toString()) {
         res.status(401);
         throw new Error('Unauthorized request');
-    }
+    };
+
+    if (!allowedRoles.includes(user.role)) {
+        res.status(403);
+        throw new Error('Access denied');
+    };
+
+    if(user.role === "admin") {
+        req.admin = user;
+    } else {
+        req.user = user;
+    };
     
-    req.user = user;
     next();
 };

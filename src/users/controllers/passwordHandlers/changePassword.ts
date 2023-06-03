@@ -1,10 +1,12 @@
 import { Request, Response } from 'express';
-import checkDataExistence from '../../utils/validators/checkDataExistence';
-import User from '../../models/userModel';
+import checkDataExistence from '../../../utils/validators/checkDataExistence';
+import User from '../../../models/userModel';
 import bcryptjs from 'bcryptjs';
+import { IUserDocument } from '../../../types/user.interface';
 
 async function changePassword(req: Request, res: Response) {
     const { oldPassword, newPassword } = req.body;
+    let user: IUserDocument | null;
 
     checkDataExistence(res, [oldPassword, newPassword], "Please fill in all required fields", true);
 
@@ -17,8 +19,12 @@ async function changePassword(req: Request, res: Response) {
         throw new Error("Invalid old password");
     }
 
-    const user = await User.findById(req.user?._id);
-
+    if(req.admin) {
+        user = await User.findById(req.admin?._id);
+    } else {
+        user = await User.findById(req.user?._id);
+    };
+    
     if(user === null) {
         res.status(404);
         throw new Error("User not found");

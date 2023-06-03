@@ -17,7 +17,7 @@ toursRouter.get('/lastminutes', catchAsync(getLastMinutes));
 toursRouter.get('/:slug', catchAsync(getTour));
 toursRouter.get('/', catchAsync(filterTours));
 
-toursRouter.post('/:slug/reviews', catchAsync(protection), catchAsync(createReview));
-toursRouter.delete('/reviews', catchAsync(protection), catchAsync(deleteReview));
+toursRouter.patch('/:slug/reviews', catchAsync(protection, ['user']), catchAsync(createReview));
+toursRouter.delete('/reviews', catchAsync(protection, ['user', 'admin']), catchAsync(deleteReview));
 
 export default toursRouter;

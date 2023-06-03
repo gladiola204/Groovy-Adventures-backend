@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import checkDataExistence from '../../utils/validators/checkDataExistence';
+import checkDataExistence from '../../../utils/validators/checkDataExistence';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import Token from '../../models/tokenModel';
-import User from '../../models/userModel';
+import Token from '../../../models/tokenModel';
+import User from '../../../models/userModel';
 
 
 async function resetPassword(req: Request, res: Response) {
