@@ -39,5 +39,12 @@ export const emailValidation = userValidationSchema.keys({
 export const passwordValidation = userValidationSchema.keys({
     login: Joi.optional(),
     email: Joi.optional(),
+});
+
+export const phoneValidation = userValidationSchema.keys({
+    login: Joi.optional(),
+    email: Joi.optional(),
+    password: Joi.optional(),
+    phone: Joi.required(),
 })
 

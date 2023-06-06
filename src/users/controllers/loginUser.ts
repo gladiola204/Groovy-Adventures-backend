@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import checkDataExistence from '../../utils/validators/checkDataExistence';
-import emailValidator from '../../utils/validators/emailValidator';
 import Token from '../../models/tokenModel';
 import User from '../../models/user/userModel';
 import { generateToken } from '../../utils/tokenUtils';

@@ -54,11 +54,6 @@ async function purchaseTour(req: Request, res: Response) {
                 throw new Error("Schedule not found");
             };
     
-            if(Number(numberOfParticipants) === 0 ) {
-                res.status(400);
-                throw new Error("Number of participants must be more than 0.");
-            }
-    
             if(numberOfParticipants > schedule.availability) {
                 res.status(400);
                 throw new Error(`Availability of this tour's schedule is lower than ${numberOfParticipants}. You cannot buy the tour.`)
@@ -66,7 +61,7 @@ async function purchaseTour(req: Request, res: Response) {
     
             schedule.availability = schedule.availability - numberOfParticipants;
 
-            await schedule.save();
+            await schedule?.save();
         };
 
         const purchaseTour = await User.findByIdAndUpdate(req.user?._id, {

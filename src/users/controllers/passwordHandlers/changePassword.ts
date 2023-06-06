@@ -12,8 +12,8 @@ async function changePassword(req: Request, res: Response) {
 
     checkDataExistence(res, [oldPassword, newPassword], "Please fill in all required fields", true);
 
-    validateData(passwordValidation, { newPassword }, res);
-    
+    validateData(passwordValidation, { password: newPassword }, res);
+
     if(oldPassword.length < 6) {
         res.status(400);
         throw new Error("Invalid old password");

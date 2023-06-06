@@ -3,6 +3,8 @@ import checkDataExistence from '../../../utils/validators/checkDataExistence';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import Token from '../../../models/tokenModel';
 import User from '../../../models/user/userModel';
+import validateData from '../../../utils/validators/validateData';
+import { passwordValidation } from '../../../models/user/userValidationSchema';
 
 
 async function resetPassword(req: Request, res: Response) {
@@ -10,6 +12,7 @@ async function resetPassword(req: Request, res: Response) {
     const { newPassword } = req.body;
 
     checkDataExistence(res, [req.body, newPassword], "Please fill in new password field.", true);
+    validateData(passwordValidation, { password: newPassword }, res );
 
     // verify token
     const verifiedToken = jwt.verify(token, `${process.env.JWT_SECRET}`) as JwtPayload;

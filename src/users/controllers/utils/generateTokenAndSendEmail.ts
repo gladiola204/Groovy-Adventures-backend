@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { Document, Types } from "mongoose";
 import Token from "../../../models/tokenModel";
 import { generateToken } from "../../../utils/tokenUtils";
-import sendEmail from "../../../utils/sendEmail";
+import sendEmail from "./sendEmail";
 import { IUserDocument } from "../../../types/user.interface";
 
 const generateTokenAndSendEmail = async (req: Request, res: Response, user: (Document<unknown, {}, IUserDocument> & Omit<IUserDocument & {

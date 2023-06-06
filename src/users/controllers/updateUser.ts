@@ -1,16 +1,12 @@
 import { Request, Response } from 'express';
-import checkDataExistence from '../../utils/validators/checkDataExistence';
 import User from '../../models/user/userModel';
+import validateData from '../../utils/validators/validateData';
+import { phoneValidation } from '../../models/user/userValidationSchema';
 
 export async function updateUser(req: Request, res: Response) {
     const { phone } = req.body;
 
-    checkDataExistence(res, [phone], "Phone field is empty", true);
-
-    if(!phone.startsWith('+')) {
-        res.status(400);
-        throw new Error("Invalid phone number format")
-    };
+    validateData(phoneValidation, req.body, res);
 
     const updatedUser = await User.findByIdAndUpdate(req.user?._id, { phone });
 

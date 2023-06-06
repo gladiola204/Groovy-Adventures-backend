@@ -1,23 +1,9 @@
 import { Request, Response } from "express";
 import Tour from "../../models/tour/tourModel";
 import Category from "../../models/categoryModel";
-import { Types } from "mongoose";
-
-interface ISearchCriteria {
-    schedule?: {
-        $elemMatch: {
-            price?: { $lte: number };
-            startDate?: {$gte: Date};
-            endDate?: {$lte: Date};
-            availability?: { $gte: number };
-        }
-    };
-    category?: Types.ObjectId;
-    lastMinute?: {
-        isLastMinute: boolean;
-        expiresAt: { $gte: Date };
-    } 
-}
+import { ObjectId } from "mongoose";
+import Schedule from "../../models/schedule/scheduleModel";
+import { ICategoryDocument } from "../../types/category.interface";
 
 interface IQuery {
     category?: string,
@@ -25,26 +11,31 @@ interface IQuery {
     people?: string,
     startDate?: string,
     endDate?: string,
-    lastMinute?: string,
 }
 
 async function filterTours(req: Request, res: Response) {
-    const { category, price, people, startDate, endDate, lastMinute }: IQuery  = req.query;
+    const { category, price, people, startDate, endDate }: IQuery  = req.query;
 
-  // Tworzenie obiektu z kryteriami wyszukiwania na podstawie przekazanych parametrów zapytania
-  let searchCriteria: ISearchCriteria = {};
+    let tourIds: ObjectId[] = [];
+    let scheduleIdsArray: string[] = [];
+    let categoryDoc: ICategoryDocument | null = null;
 
     if(price || people || startDate || endDate) {
-        searchCriteria = {
-            schedule: {
-                $elemMatch: {
-                    ...(price && { price: { $lte: Number(price) } }),
-                    ...(people && { availability: { $gte: Number(people) } }),
-                    ...(startDate && { startDate: { $gte: new Date(startDate) } }),
-                    ...(endDate && { endDate: { $lte: new Date(endDate) } }),
-                }
-            }
-        }
+        const schedules = await Schedule.find({
+            ...(price && { price: { $lte: Number(price) } }),
+            ...(people && { availability: { $gte: Number(people) } }),
+            ...(startDate && { startDate: { $gte: new Date(startDate) } }),
+            ...(endDate && { endDate: { $lte: new Date(endDate) } }),
+        });
+        if(schedules.length === 0) {
+            res.status(404);
+            throw new Error('Tours not found');
+        };
+
+        schedules.map(schedule => {
+            tourIds.push(schedule.tourId);
+            scheduleIdsArray.push(schedule._id.toString());
+        });
     }
 
     if (category) {
@@ -53,21 +44,25 @@ async function filterTours(req: Request, res: Response) {
             res.status(404);
             throw new Error("Category not found")
         };
-        searchCriteria.category = categoryDB._id;
+        categoryDoc = categoryDB;
     }
 
-    if(lastMinute) {
-        searchCriteria.lastMinute = {
-            isLastMinute: true,
-            expiresAt: { $gte: new Date() },
-        }
-    }
-
-    const filteredTours = await Tour.find(searchCriteria);
+    const filteredTours = await Tour.find({
+        ...(tourIds.length > 0 && { _id: { $in: tourIds } }),
+        ...(categoryDoc && { category: categoryDoc._id }),
+    }).populate("scheduleIds");
     
     if(filteredTours === null) {
         res.status(404);
         throw new Error("Tours not found");
+    };
+
+    if(scheduleIdsArray.length > 0) {
+        filteredTours.map(tour => {
+            tour.scheduleIds = tour.scheduleIds.filter((schedule: any) => {
+                return scheduleIdsArray.includes(schedule._id.toString());
+            });
+        });
     };
 
     res.status(200).json(filteredTours);

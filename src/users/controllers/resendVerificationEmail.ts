@@ -11,7 +11,6 @@ async function resendVerificationEmail(req: Request, res: Response) {
     const { email } = body;
 
     checkDataExistence(res, [body, email], "Please fill in email field", true);
-
     validateData(emailValidation, body, res);
 
     const userExists = await User.findOne({ email });
