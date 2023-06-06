@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
 import checkDataExistence from '../../../utils/validators/checkDataExistence';
-import User from '../../../models/userModel';
+import User from '../../../models/user/userModel';
 import bcryptjs from 'bcryptjs';
 import { IUserDocument } from '../../../types/user.interface';
+import validateData from '../../../utils/validators/validateData';
+import { passwordValidation } from '../../../models/user/userValidationSchema';
 
 async function changePassword(req: Request, res: Response) {
     const { oldPassword, newPassword } = req.body;
@@ -10,10 +12,8 @@ async function changePassword(req: Request, res: Response) {
 
     checkDataExistence(res, [oldPassword, newPassword], "Please fill in all required fields", true);
 
-    if(newPassword.length < 6) {
-        res.status(400);
-        throw new Error("New password must be more than 6 characters.");
-    };
+    validateData(passwordValidation, { newPassword }, res);
+    
     if(oldPassword.length < 6) {
         res.status(400);
         throw new Error("Invalid old password");

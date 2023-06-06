@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import cloudinary from 'cloudinary';
-import Image from '../../../models/imageModel';
+import Image from '../../../models/image/imageModel';
 import { IImageDocument } from '../../../types/image.interface';
 import { ClientSession, ObjectId } from 'mongoose';
 

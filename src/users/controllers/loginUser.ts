@@ -2,9 +2,11 @@ import { Request, Response } from 'express';
 import checkDataExistence from '../../utils/validators/checkDataExistence';
 import emailValidator from '../../utils/validators/emailValidator';
 import Token from '../../models/tokenModel';
-import User from '../../models/userModel';
+import User from '../../models/user/userModel';
 import { generateToken } from '../../utils/tokenUtils';
 import bcryptjs from 'bcryptjs';
+import validateData from '../../utils/validators/validateData';
+import { loginUserValidation } from '../../models/user/userValidationSchema';
 
 async function loginUser(req: Request, res: Response) {
     const { body } = req;
@@ -12,16 +14,7 @@ async function loginUser(req: Request, res: Response) {
     let token: string;
 
     checkDataExistence(res, [body, email, password], "Please fill in all required fields", true);
-
-    if(password.length < 6) {
-        res.status(400);
-        throw new Error("Invalid password or email");
-    };
-
-    if(!emailValidator(email)) {
-        res.status(400);
-        throw new Error("Invalid email address format.");
-    };
+    validateData(loginUserValidation, body, res);
 
     const userExists = await User.findOne({ email });
 

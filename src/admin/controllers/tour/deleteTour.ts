@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import Tour from "../../../models/tourModel";
+import Tour from "../../../models/tour/tourModel";
 import deleteImages from "../utils/deleteImages";
-import { ObjectId, startSession } from "mongoose";
-import Schedule from "../../../models/scheduleModel";
+import { startSession } from "mongoose";
+import Schedule from "../../../models/schedule/scheduleModel";
 
 async function deleteTour(req: Request, res: Response) {
     const { slug } = req.params;
@@ -33,10 +33,6 @@ async function deleteTour(req: Request, res: Response) {
     } finally {
         session.endSession();
     }
-
-    
-
-    // delete wszystkie powiazane schedules
     
     res.status(200).json({ 
         success: true,

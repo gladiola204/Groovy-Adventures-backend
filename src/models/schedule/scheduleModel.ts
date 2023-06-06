@@ -1,5 +1,6 @@
 import { Schema, model } from "mongoose"
-import { IScheduleDocument, IScheduleModel } from "../types/schedule.interface";
+import { IScheduleDocument, IScheduleModel } from "../../types/schedule.interface";
+
 
 const scheduleSchema = new Schema<IScheduleDocument, IScheduleModel>({
     tourId: {

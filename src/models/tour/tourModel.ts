@@ -1,12 +1,13 @@
 import mongoose from "mongoose";
 
-import { ITourDocument, ITourModel } from "../types/tour.interface";
-import updateSlug from "../utils/updateSlug";
+import { ITourDocument, ITourModel } from "../../types/tour.interface";
+import updateSlug from "../../utils/updateSlug";
 
 const tourSchema = new mongoose.Schema<ITourDocument, ITourModel>({
     title: {
         type: String,
         required: [true, "Please add a title"],
+        trim: true,
         unique: true,
     },
     images: {

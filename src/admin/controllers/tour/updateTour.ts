@@ -1,14 +1,47 @@
 import { Request, Response } from "express";
 import checkDataExistence from "../../../utils/validators/checkDataExistence";
 import Category from "../../../models/categoryModel";
-import Tour from "../../../models/tourModel";
+import Tour from "../../../models/tour/tourModel";
 import uploadImages from "../utils/uploadImages";
 import deleteImages from "../utils/deleteImages";
 import updateSlug from "../../../utils/updateSlug";
-import Schedule from "../../../models/scheduleModel";
+import Schedule from "../../../models/schedule/scheduleModel";
 import { ObjectId, startSession } from "mongoose";
-import Image from "../../../models/imageModel";
+import Image from "../../../models/image/imageModel";
 import { ITourDocument } from "../../../types/tour.interface";
+import { deleteScheduleSchema, scheduleArrayValidationSchema, updateScheduleSchema } from "../../../models/schedule/scheduleValidationSchema";
+import { updateTourSchema } from "../../../models/tour/tourValidationSchema";
+import imageArrayValidationSchema from "../../../models/image/imageValidationSchema";
+import validateData from "../../../utils/validators/validateData";
+
+interface IUpdateTourBody {
+    title?: string,
+    category?: string,
+    generalDescription?: string,
+    dailyItineraryDescription?: string,
+    newSchedules?: [{
+        startDate: string,
+        endDate: string,
+        price: number,
+        availability: number,
+    }],
+    updatedSchedules?: [{
+        _id: ObjectId | string,
+        startDate? : string,
+        endDate?: string, 
+        price?: number, 
+        availability?: number, 
+        discount?: {
+            isDiscounted: boolean,
+            percentageOfDiscount: number,
+            expiresAt: string,
+        },
+    }],
+    deletedSchedules?: [{
+        id: ObjectId | string
+    }],
+    idOfImagesToRemove?: ObjectId[] | string[],
+}
 
 async function updateTour(req: Request, res: Response) {    
     const { title, 
@@ -19,13 +52,19 @@ async function updateTour(req: Request, res: Response) {
         newSchedules,
         deletedSchedules,
         idOfImagesToRemove,
-        } = req.body;    
+    }: IUpdateTourBody = req.body;    
     const { slug } = req.params;
     const scheduleIds: ObjectId[] = [];
     let images: ObjectId[] = [];
     let updatedTour: ITourDocument | null;
 
     checkDataExistence(res, [req.body], "Please update at least one field", true);
+    
+    validateData(updateTourSchema, { title, generalDescription, dailyItineraryDescription }, res);
+    validateData(scheduleArrayValidationSchema, newSchedules, res);
+    validateData(updateScheduleSchema, updatedSchedules, res);
+    validateData(deleteScheduleSchema, deletedSchedules, res);
+    validateData(imageArrayValidationSchema, idOfImagesToRemove, res);
 
     const tour = await Tour.findOne({ slug });
 
@@ -82,30 +121,11 @@ async function updateTour(req: Request, res: Response) {
         };
 
         if(updatedSchedules) {
-            if(!Array.isArray(updatedSchedules)) {
-                res.status(400);
-                throw new Error("Invalid format of updated schedule's data. Please provide an array.")
-            }
             for (const scheduleData of updatedSchedules) {
-                const { startDate, endDate, price, availability, lastMinute, discount } = scheduleData;
-    
-                if(!updatedSchedules.hasOwnProperty("_id")) {
-                    res.status(400);
-                    throw new Error("Please fill in id schedule"); 
-                };
-    
-                if(startDate && !endDate || !startDate && endDate) {
-                    res.status(400);
-                    throw new Error("Please provide start date and end date");
-                } else if(startDate && endDate) {
-                    if( (new Date(startDate)) > (new Date(endDate)) ) {
-                        res.status(400);
-                        throw new Error("End date must be later than start date.")
-                    }
-                }
+                const { startDate, endDate, price, availability, discount } = scheduleData;
     
                 const schedule = await Schedule.findByIdAndUpdate(scheduleData._id, {
-                    startDate, endDate, price, availability, lastMinute, discount
+                    startDate, endDate, price, availability, discount
                 }, {
                     runValidators: true,
                     new: true,
@@ -119,22 +139,7 @@ async function updateTour(req: Request, res: Response) {
         };
 
         if(newSchedules) {
-            if(!Array.isArray(newSchedules)) {
-                res.status(400);
-                throw new Error("Invalid format of new schedule's data. Please provide an array.")
-            };
-    
             for (const scheduleData of newSchedules) {
-                if(!scheduleData.hasOwnProperty("startDate") || !scheduleData.hasOwnProperty("endDate") || !scheduleData.hasOwnProperty("price") || !scheduleData.hasOwnProperty("availability")) {
-                    res.status(400);
-                    throw new Error("Please fill in all required data in schedule");
-                };
-    
-                if( (new Date(scheduleData.startDate)) > (new Date(scheduleData.endDate)) ) {
-                    res.status(400);
-                    throw new Error("End date must be later than start date.")
-                }
-            
                 const newSchedule = new Schedule({
                     tourId: tour._id,
                     ...scheduleData
@@ -147,19 +152,10 @@ async function updateTour(req: Request, res: Response) {
         };
 
         if(deletedSchedules) {
-            if(!Array.isArray(deletedSchedules)) {
-                res.status(400);
-                throw new Error("Invalid format of deleted schedule's data. Please provide an array.")
-            };
             const arrayOfSchedulesToFilter: string[] = [];
     
-            for (const scheduleData of deletedSchedules) {
-                if(!scheduleData.hasOwnProperty("_id")) {
-                    res.status(400);
-                    throw new Error("Please fill in schedule's id");
-                };
-            
-                const deletedSchedule = await Schedule.findByIdAndDelete(scheduleData._id).session(session);
+            for (const scheduleData of deletedSchedules) {    
+                const deletedSchedule = await Schedule.findByIdAndDelete(scheduleData.id).session(session);
     
                 if(deletedSchedule === null) {
                     res.status(404);

@@ -1,15 +1,43 @@
 import { Request, Response } from "express";
 import Tour from "../../models/tour/tourModel";
-import User from "../../models/userModel";
+import User from "../../models/user/userModel";
 import checkDataExistence from "../../utils/validators/checkDataExistence";
 import Schedule from "../../models/schedule/scheduleModel";
 import { ObjectId, startSession } from "mongoose";
+import Joi from "joi";
+import JoiObjectId from 'joi-objectid';
+import validateData from "../../utils/validators/validateData";
+
+interface IPurchaseDataProps {
+    purchaseData: [{
+        scheduleId: ObjectId | string,
+        numberOfParticipants: number,
+    }]
+};
+
+const purchaseDataSchema = Joi.array().items({
+    scheduleId: Joi.alternatives()
+    .try(Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
+        'string.pattern.base': 'Schedule ID must be a valid ObjectId',
+    }),
+    JoiObjectId(Joi)).required().messages({
+        'any.invalid': 'Schedule ID must be a valid ObjectId',
+        'string.objectId': 'Invalid schedule ID',
+    }),
+    numberOfParticipants: Joi.number().required().min(1).messages({
+        'any.required': 'Please add a number of participants',
+        'number.base': 'Please add a number of participants',
+        'number.less': 'Number of participants must be minimum 1',
+    })
+})
 
 async function purchaseTour(req: Request, res: Response) {
-    const { purchaseData } = req.body;
+    const { purchaseData }: IPurchaseDataProps = req.body;
     const arrayOfBoughtTourId: ObjectId[] = [];
 
     checkDataExistence(res, [req.body, purchaseData], 'Please fill in purchaseData', true);
+
+    validateData(purchaseDataSchema, req.body, res);
     
     const session = await startSession();
     session.startTransaction();
@@ -28,7 +56,7 @@ async function purchaseTour(req: Request, res: Response) {
     
             if(Number(numberOfParticipants) === 0 ) {
                 res.status(400);
-                throw new Error("Number of participants must more than 0.");
+                throw new Error("Number of participants must be more than 0.");
             }
     
             if(numberOfParticipants > schedule.availability) {

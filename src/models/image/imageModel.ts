@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import { IImageDocument, IImageModel } from "../types/image.interface";
+import { IImageDocument, IImageModel } from "../../types/image.interface";
 
 
 const imageSchema = new Schema<IImageDocument, IImageModel>({

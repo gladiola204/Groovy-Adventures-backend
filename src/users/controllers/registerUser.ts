@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import checkDataExistence from "../../utils/validators/checkDataExistence";
-import emailValidator from "../../utils/validators/emailValidator";
-import User from "../../models/userModel";
+import User from "../../models/user/userModel";
 import generateTokenAndSendEmail from "./utils/generateTokenAndSendEmail";
+import validateData from "../../utils/validators/validateData";
+import { userValidationSchema } from "../../models/user/userValidationSchema";
 
 async function registerUser(req: Request, res: Response) {
     const { body } = req;
@@ -10,19 +11,7 @@ async function registerUser(req: Request, res: Response) {
 
     checkDataExistence(res, [body, email, login, password], "Please fill in all required fields", true);
 
-    if(login.trim() === '' || password.trim() === '') {
-        res.status(400);
-        throw new Error("Please fill in all required fields");
-    }
-    if(password.length < 6) {
-        res.status(400);
-        throw new Error("Password must be more than 6 characters");
-    };
-
-    if(!emailValidator(email)) {
-        res.status(400);
-        throw new Error("Invalid email address format.");
-    }
+    validateData(userValidationSchema, body, res);
 
     // Check email in database
     const userExists = await User.findOne({email});

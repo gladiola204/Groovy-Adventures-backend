@@ -2,17 +2,25 @@ import { Request, Response } from "express";
 import checkDataExistence from "../../../utils/validators/checkDataExistence";
 import Category from "../../../models/categoryModel";
 import uploadImages from "../utils/uploadImages";
-import Image from "../../../models/imageModel";
+import Image from "../../../models/image/imageModel";
 import { IImageDocument } from "../../../types/image.interface";
 import { startSession } from "mongoose";
 import { ICategoryDocument } from "../../../types/category.interface";
 
+interface ICreateCategoryBody {
+    title: string
+}
 
 async function createCategory(req: Request, res: Response) {
-    const { title } = req.body;
+    const { title }: ICreateCategoryBody = req.body;
     let category: ICategoryDocument;
 
     checkDataExistence(res, [req.body, title, req.file], "Please fill in all fields", true);
+
+    if(typeof title !== "string") {
+        res.status(400);
+        throw new Error("Title must be a string");
+    }
 
     const categoryDB = await Category.findOne({ title });
     if(categoryDB !== null) {

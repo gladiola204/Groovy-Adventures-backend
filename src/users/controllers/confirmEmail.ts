@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { JwtPayload } from 'jsonwebtoken';
 import jwt from 'jsonwebtoken';
 import Token from '../../models/tokenModel';
-import User from '../../models/userModel';
+import User from '../../models/user/userModel';
 
 async function confirmEmail(req: Request, res: Response) {
     const { token } = req.params;

@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
 import checkDataExistence from "../../utils/validators/checkDataExistence";
 import Tour from "../../models/tour/tourModel";
-import Review from "../../models/reviewModel";
+import Review from "../../models/review/reviewModel";
 import { ObjectId, startSession } from "mongoose";
 import { IReviewDocument } from "../../types/review.interface";
+import validateData from "../../utils/validators/validateData";
+import { reviewValidationSchema } from "../../models/review/reviewValidationSchema";
 
 async function createReview(req: Request, res: Response) {
     const { slug } = req.params;
@@ -11,19 +13,7 @@ async function createReview(req: Request, res: Response) {
     let newReview: IReviewDocument;
     checkDataExistence(res, [req.body, req.user, cleanliness, valuePrice, food, communication, attractions, atmosphere, comment], "Please fill in all required fields", true);
 
-    if(comment.trim().length > 249 || comment.trim().length < 11) {
-        res.status(400);
-        throw new Error("The comment must be more than 10 and less than 250 characters.");
-    };
-
-    const ratings = [cleanliness, valuePrice, food, communication, attractions, atmosphere];
-
-    const isValid = ratings.every(rating => Number(rating) > 0 && Number(rating) < 6);
-
-    if(!isValid) {
-        res.status(400);
-        throw new Error("Ratings must be minimum 1 point and maximum 5 points.");
-    };
+    validateData(reviewValidationSchema, req.body, res);
 
     const session = await startSession();
     session.startTransaction();

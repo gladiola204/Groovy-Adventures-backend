@@ -3,14 +3,17 @@ import Category from "../../../models/categoryModel";
 import checkDataExistence from "../../../utils/validators/checkDataExistence";
 import deleteImages from "../utils/deleteImages";
 import uploadImages from "../utils/uploadImages";
-import Image from "../../../models/imageModel";
+import Image from "../../../models/image/imageModel";
 import { IImageDocument } from "../../../types/image.interface";
 import { startSession } from "mongoose";
 import { ICategoryDocument } from "../../../types/category.interface";
 
+interface IUpdateCategoryBody {
+    title: string
+}
 
 async function updateCategory(req: Request, res: Response) {
-    const { title } = req.body;
+    const { title }: IUpdateCategoryBody = req.body;
     const { slug } = req.params;
     let updatedCategory: ICategoryDocument | null;
 
@@ -19,6 +22,10 @@ async function updateCategory(req: Request, res: Response) {
     if(!title && !req.file) {
         res.status(400);
         throw new Error("Please update at least one field");
+    }
+    if(title && typeof title !== "string") {
+        res.status(400);
+        throw new Error("Title must be a string");
     }
 
     const category = await Category.findOne({ slug });

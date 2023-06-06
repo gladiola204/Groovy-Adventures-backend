@@ -1,23 +1,41 @@
 import { Request, Response } from "express";
 import checkDataExistence from "../../../utils/validators/checkDataExistence";
-import Tour from "../../../models/tourModel";
+import Tour from "../../../models/tour/tourModel";
 import Category from "../../../models/categoryModel";
 import uploadImages from "../utils/uploadImages";
-import Schedule from "../../../models/scheduleModel";
+import Schedule from "../../../models/schedule/scheduleModel";
 import { ObjectId, startSession } from "mongoose";
-import Image from "../../../models/imageModel";
+import Image from "../../../models/image/imageModel";
 import { ITourDocument } from "../../../types/tour.interface";
+import { tourValidationSchema } from "../../../models/tour/tourValidationSchema";
+import { scheduleArrayValidationSchema } from "../../../models/schedule/scheduleValidationSchema";
+import validateData from "../../../utils/validators/validateData";
+
+interface ICreateTourBody {
+    title: string,
+    category: string,
+    generalDescription: string,
+    dailyItineraryDescription: string,
+    schedules: [{
+        startDate: string,
+        endDate: string,
+        price: number,
+        availability: number,
+    }]
+}
 
 async function createTour(req: Request, res: Response) {
-    const { title, category, generalDescription, dailyItineraryDescription, schedules } = req.body;
-
+    const { title, category, generalDescription, dailyItineraryDescription, schedules }: ICreateTourBody = req.body;
     let tour: ITourDocument;
 
     checkDataExistence(res,
-        [req.body, title, category, generalDescription, dailyItineraryDescription, req.files], 
+        [req.body, title, category, schedules, generalDescription, dailyItineraryDescription, req.files], 
         "Please fill in all fields", 
         true
     );
+
+    validateData(tourValidationSchema, {title, category, generalDescription, dailyItineraryDescription}, res);
+    validateData(scheduleArrayValidationSchema, schedules, res);
 
     // Check if title is unique
     const titleDB = await Tour.findOne({ title });
@@ -58,27 +76,22 @@ async function createTour(req: Request, res: Response) {
         tour.$session(session);
         await tour.save();
 
-        if(schedules) { //DO TESTÓW TYLKO
-            const scheduleArray: ObjectId[] = [];
-            for (const scheduleData of schedules) {
-                if(!scheduleData.hasOwnProperty("startDate") || !scheduleData.hasOwnProperty("endDate") || !scheduleData.hasOwnProperty("price") || !scheduleData.hasOwnProperty("availability")) {
-                    res.status(400);
-                    throw new Error("Please fill in all required data in schedule");
-                };
-                
-                const newSchedule = new Schedule({
-                    tourId: tour._id,
-                    ...scheduleData
-                });
-                newSchedule.$session(session);
-                await newSchedule.save();
-        
-                scheduleArray.push(newSchedule._id);
-            }
-        
-            tour.scheduleIds = [...tour.scheduleIds, ...scheduleArray];
-            await tour.save();
+    
+        const scheduleArray: ObjectId[] = [];
+        for (const scheduleData of schedules) {
+            
+            const newSchedule = new Schedule({
+                tourId: tour._id,
+                ...scheduleData
+            });
+            newSchedule.$session(session);
+            await newSchedule.save();
+    
+            scheduleArray.push(newSchedule._id);
         }
+    
+        tour.scheduleIds = [...tour.scheduleIds, ...scheduleArray];
+        await tour.save();
       
         await session.commitTransaction();
     } catch (error) {

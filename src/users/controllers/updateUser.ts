@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import checkDataExistence from '../../utils/validators/checkDataExistence';
-import User from '../../models/userModel';
+import User from '../../models/user/userModel';
 
 export async function updateUser(req: Request, res: Response) {
     const { phone } = req.body;

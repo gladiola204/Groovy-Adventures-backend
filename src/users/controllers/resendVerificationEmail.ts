@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import checkDataExistence from "../../utils/validators/checkDataExistence";
-import emailValidator from "../../utils/validators/emailValidator";
-import User from "../../models/userModel";
+import User from "../../models/user/userModel";
 import generateTokenAndSendEmail from "./utils/generateTokenAndSendEmail";
+import validateData from "../../utils/validators/validateData";
+import { emailValidation } from "../../models/user/userValidationSchema";
 
 async function resendVerificationEmail(req: Request, res: Response) {
     
@@ -11,10 +12,7 @@ async function resendVerificationEmail(req: Request, res: Response) {
 
     checkDataExistence(res, [body, email], "Please fill in email field", true);
 
-    if(!emailValidator(email)) {
-        res.status(400);
-        throw new Error("Invalid email address format.");
-    }
+    validateData(emailValidation, body, res);
 
     const userExists = await User.findOne({ email });
 

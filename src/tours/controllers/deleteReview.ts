@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import checkDataExistence from "../../utils/validators/checkDataExistence";
-import Review from "../../models/reviewModel";
+import Review from "../../models/review/reviewModel";
 import Tour from "../../models/tour/tourModel";
 import { startSession } from "mongoose";
 import { IReviewDocument } from "../../types/review.interface";
@@ -9,6 +9,11 @@ async function deleteReview(req: Request, res: Response) {
     const { reviewId } = req.body;
 
     checkDataExistence(res, [req.body, reviewId], "Please fill in review ID", true);
+
+    if(typeof reviewId !== "string") {
+        res.status(400);
+        throw new Error("Review id must be a string");
+    };
 
     const session = await startSession();
     session.startTransaction();

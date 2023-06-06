@@ -1,10 +1,13 @@
 import mongoose from "mongoose";
 import bcryptjs from 'bcryptjs';
-import { IUserDocument, IUserModel } from "../types/user.interface";
+import { IUserDocument, IUserModel } from "../../types/user.interface";
 
 const userSchema = new mongoose.Schema<IUserDocument, IUserModel>({
     login: {
         type: String,
+        minLength: 3,
+        maxlength: 40,
+        trim: true,
         required: [true, "Please add a login"],
         unique: true,
     },
@@ -26,6 +29,7 @@ const userSchema = new mongoose.Schema<IUserDocument, IUserModel>({
     },
     phone: {
         type: String,
+        trim: true,
         default: "+48",
     },
     emailVerified: {
