@@ -4,7 +4,7 @@ import Tour from "../../models/tour/tourModel";
 async function getTour(req: Request, res: Response) {
     const { slug } = req.params;
 
-    const tour = await Tour.findOne({ slug }).populate("reviews");
+    const tour = await Tour.findOne({ slug }).populate("reviews").populate("images").populate("scheduleIds").populate("category");
     
     if(tour === null) {
         res.status(404);
